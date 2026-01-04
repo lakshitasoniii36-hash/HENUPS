@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useRef, useState, useEffect } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { Text } from '@react-three/drei';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 
@@ -9,41 +11,100 @@ const fileExtensions = [
   '.env', '.yml', '.bash', '.sh', '.md', '.txt'
 ];
 
-function FloatingExtension({ extension, delay, index }) {
-  const [position, setPosition] = useState({
-    x: Math.random() * 100,
-    y: -10
+function FallingCube({ position, extension, shouldStay }) {
+  const meshRef = useRef();
+  const groupRef = useRef();
+  const [settled, setSettled] = useState(false);
+  const velocity = useRef(0);
+  const groundY = shouldStay ? -2 : -2.5;
+
+  useFrame((state, delta) => {
+    if (!groupRef.current) return;
+
+    if (!settled) {
+      velocity.current += -9.8 * delta * 0.5;
+      groupRef.current.position.y += velocity.current * delta;
+
+      if (groupRef.current.position.y <= groundY) {
+        groupRef.current.position.y = groundY;
+        setSettled(true);
+        velocity.current = 0;
+      }
+      
+      groupRef.current.rotation.x += delta * 1.5;
+      groupRef.current.rotation.y += delta * 1.2;
+    } else {
+      // Slight idle rotation when settled
+      groupRef.current.rotation.y += delta * 0.1;
+    }
   });
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const interval = setInterval(() => {
-        setPosition(prev => ({
-          x: prev.x + (Math.random() - 0.5) * 2,
-          y: prev.y > 110 ? -10 : prev.y + 0.5
-        }));
-      }, 50);
-      return () => clearInterval(interval);
-    }, delay);
-    return () => clearTimeout(timer);
-  }, [delay]);
+  return (
+    <group ref={groupRef} position={position}>
+      <mesh ref={meshRef} castShadow receiveShadow>
+        <boxGeometry args={[0.8, 0.8, 0.8]} />
+        <meshStandardMaterial 
+          color="#1a1a2e" 
+          emissive="#FF79C6" 
+          emissiveIntensity={0.3}
+          metalness={0.5}
+          roughness={0.3}
+        />
+      </mesh>
+      <Text
+        position={[0, 0, 0.41]}
+        fontSize={0.15}
+        color="#EDEDED"
+        anchorX="center"
+        anchorY="middle"
+        font="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff"
+      >
+        {extension}
+      </Text>
+    </group>
+  );
+}
+
+function Scene() {
+  const positions = fileExtensions.map((_, i) => {
+    const angle = (i / fileExtensions.length) * Math.PI * 2;
+    const radius = 5 + Math.random() * 3;
+    return {
+      pos: [
+        Math.cos(angle) * radius,
+        8 + Math.random() * 12,
+        Math.sin(angle) * radius
+      ],
+      shouldStay: i % 3 === 0 // Every 3rd cube stays on ground
+    };
+  });
 
   return (
-    <div
-      className="absolute px-4 py-2 rounded-lg font-mono text-sm transition-all duration-100"
-      style={{
-        left: `${position.x}%`,
-        top: `${position.y}%`,
-        backgroundColor: '#1a1a2e',
-        color: '#EDEDED',
-        border: '1px solid #FF79C640',
-        boxShadow: '0 0 15px rgba(255, 121, 198, 0.3)',
-        transform: 'translateX(-50%)',
-        zIndex: 0
-      }}
-    >
-      {extension}
-    </div>
+    <>
+      <ambientLight intensity={0.4} />
+      <pointLight position={[10, 10, 10]} intensity={1} castShadow />
+      <pointLight position={[-10, 5, -10]} intensity={0.5} />
+      <spotLight position={[0, 15, 0]} intensity={0.8} angle={0.6} penumbra={1} castShadow />
+      
+      {fileExtensions.map((ext, i) => (
+        <FallingCube 
+          key={ext} 
+          position={positions[i].pos} 
+          extension={ext}
+          shouldStay={positions[i].shouldStay}
+        />
+      ))}
+      
+      {/* Ground plane */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.5, 0]} receiveShadow>
+        <planeGeometry args={[100, 100]} />
+        <meshStandardMaterial 
+          color="#0D0D0D" 
+          metalness={0.2}
+          roughness={0.8}
+        />
+      </mesh>
+    </>
   );
 }
 
@@ -52,20 +113,21 @@ export default function Landing() {
 
   return (
     <div className="relative w-full h-screen bg-[#0D0D0D] overflow-hidden">
-      {/* Floating Extensions Background */}
+      {/* 3D Background */}
       <div className="absolute inset-0">
-        {fileExtensions.map((ext, i) => (
-          <FloatingExtension 
-            key={ext} 
-            extension={ext} 
-            delay={i * 200}
-            index={i}
-          />
-        ))}
+        <Canvas
+          shadows
+          camera={{ position: [0, 3, 15], fov: 60 }}
+          style={{ background: '#0D0D0D' }}
+        >
+          <Suspense fallback={null}>
+            <Scene />
+          </Suspense>
+        </Canvas>
       </div>
 
       {/* Content Overlay */}
-      <div className="relative z-10 flex flex-col items-center justify-center h-full">
+      <div className="relative z-10 flex flex-col items-center justify-center h-full pointer-events-none">
         <h1 
           className="text-8xl font-bold mb-6 tracking-wider"
           style={{ 
@@ -83,7 +145,7 @@ export default function Landing() {
         </p>
         <Button
           onClick={() => navigate('/ide')}
-          className="px-12 py-6 text-lg rounded-full transition-all duration-300 hover:shadow-2xl"
+          className="px-12 py-6 text-lg rounded-full transition-all duration-300 hover:shadow-2xl pointer-events-auto"
           style={{
             backgroundColor: '#EDEDED',
             color: '#0D0D0D',
