@@ -6,9 +6,6 @@ import { Button } from './ui/button';
 export default function Navigation() {
   const location = useLocation();
   const [downloadGlow, setDownloadGlow] = useState(false);
-  
-  // Don't show navigation in IDE
-  if (location.pathname === '/ide') return null;
 
   useEffect(() => {
     const glowInterval = setInterval(() => {
@@ -18,6 +15,9 @@ export default function Navigation() {
     
     return () => clearInterval(glowInterval);
   }, []);
+  
+  // Don't show navigation in IDE
+  if (location.pathname === '/ide') return null;
 
   const navLinks = [
     { path: '/', label: 'HENU PS' },
