@@ -346,15 +346,14 @@ export default function Landing() {
         
         {/* Button with aura */}
         <div className="relative">
-          {/* Button aura */}
+          {/* Button passive aura */}
           <div
             className="absolute inset-0 rounded-full pointer-events-none"
             style={{
-              background: 'radial-gradient(circle, rgba(237, 237, 237, 0.3) 0%, transparent 70%)',
-              filter: 'blur(20px)',
-              transform: buttonAura ? 'scale(1.5)' : 'scale(1)',
-              opacity: buttonAura ? 0.6 : 0,
-              transition: 'all 2s ease'
+              background: 'rgba(255, 255, 255, 0.15)',
+              filter: 'blur(18px)',
+              animation: 'buttonAura 12s ease-in-out infinite',
+              zIndex: -1
             }}
           />
           
