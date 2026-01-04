@@ -401,12 +401,39 @@ export default function Landing() {
           }
         }
         
-        @keyframes monolithRotate {
+        @keyframes ringRotate1 {
           from {
-            transform: rotateY(0deg);
+            transform: translate(-50%, -50%) rotate(0deg);
           }
           to {
-            transform: rotateY(360deg);
+            transform: translate(-50%, -50%) rotate(360deg);
+          }
+        }
+        
+        @keyframes ringRotate2 {
+          from {
+            transform: translate(-50%, -50%) rotate(0deg);
+          }
+          to {
+            transform: translate(-50%, -50%) rotate(360deg);
+          }
+        }
+        
+        @keyframes ringRotate3 {
+          from {
+            transform: translate(-50%, -50%) rotate(0deg);
+          }
+          to {
+            transform: translate(-50%, -50%) rotate(360deg);
+          }
+        }
+        
+        @keyframes ringRotate4 {
+          from {
+            transform: translate(-50%, -50%) rotate(0deg);
+          }
+          to {
+            transform: translate(-50%, -50%) rotate(360deg);
           }
         }
         
