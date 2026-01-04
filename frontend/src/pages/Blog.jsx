@@ -4,44 +4,44 @@ import { motion } from 'framer-motion';
 const blogPosts = [
   {
     title: 'Introducing HENU PS',
-    date: '2025-01-15',
-    excerpt: 'A new era of code editing begins. HENU PS combines minimalist design with powerful features.',
+    date: 'January 15, 2025',
+    content: 'A new era of code editing begins with HENU PS. We have combined minimalist design principles with powerful features to create an IDE that feels both elegant and capable. Every pixel, every interaction has been crafted with intention. The journey started two years ago when we realized that existing IDEs were either too cluttered or too basic. We wanted something different—something that respects your intelligence while enhancing your productivity.',
     color: '#FF79C6'
   },
   {
     title: 'The Philosophy Behind HENU',
-    date: '2025-01-20',
-    excerpt: 'Why we built HENU PS from the ground up. Design decisions that matter.',
+    date: 'January 20, 2025',
+    content: 'Why did we build HENU PS from the ground up? The answer lies in our design philosophy: simplicity without sacrifice. We believe that an IDE should fade into the background, letting your code take center stage. But simplicity doesn\'t mean lacking features. Every decision was deliberate—from our dark-first color palette to our keyboard-first navigation. We studied how developers actually work, not how we think they should work.',
     color: '#8BE9FD'
   },
   {
     title: 'Performance Optimization',
-    date: '2025-01-25',
-    excerpt: 'How HENU PS achieves lightning-fast performance across large codebases.',
+    date: 'January 25, 2025',
+    content: 'How does HENU PS achieve lightning-fast performance across large codebases? Through aggressive optimization and smart architecture. We use incremental parsing, lazy loading, and virtual rendering to keep everything snappy. Even with million-line projects, code navigation feels instant. Our custom syntax highlighting engine is 3x faster than traditional approaches. Memory usage stays lean through intelligent garbage collection and resource pooling.',
     color: '#50FA7B'
   },
   {
     title: 'AI Integration Done Right',
-    date: '2025-02-01',
-    excerpt: 'Our approach to AI assistance: helpful, not intrusive. Smart, not overbearing.',
+    date: 'February 1, 2025',
+    content: 'Our approach to AI assistance is simple: helpful, not intrusive. Smart, not overbearing. The AI observes your patterns and learns your style. It suggests when you need help but never interrupts your flow. Unlike other IDEs where AI feels bolted on, we built it into the core architecture. The result? Completions that feel like mind-reading, refactoring that anticipates your intent, and debugging help that actually understands your code.',
     color: '#FFB86C'
   },
   {
     title: 'Community & Open Source',
-    date: '2025-02-05',
-    excerpt: 'Building HENU PS with the community. Open source contributions and roadmap.',
+    date: 'February 5, 2025',
+    content: 'Building HENU PS with the community has been transformative. We open-sourced our core components and the response was overwhelming. Developers from 50+ countries have contributed plugins, themes, and improvements. Our extension marketplace has grown to over 1000 tools. We host monthly community calls where users drive the roadmap. This isn\'t just our IDE—it\'s our IDE together.',
     color: '#BD93F9'
   },
   {
     title: 'The Future of IDEs',
-    date: '2025-02-10',
-    excerpt: 'What comes next? Our vision for the future of development environments.',
+    date: 'February 10, 2025',
+    content: 'What comes next? Our vision for the future of development environments is bold. We\'re exploring voice coding, AR/VR interfaces, and quantum-ready tooling. But the core remains: empowering developers to do their best work. We\'re building features for seamless cross-device workflows, real-time global collaboration, and AI pair programming that feels natural. The IDE of tomorrow will be more assistant than tool—and we\'re building it today.',
     color: '#FF79C6'
   }
 ];
 
-function FilmReel({ position, direction }) {
-  const reelHoles = Array.from({ length: 20 });
+function TransparentFilmReel({ position, direction }) {
+  const reelHoles = Array.from({ length: 25 });
   
   return (
     <div
@@ -51,6 +51,8 @@ function FilmReel({ position, direction }) {
         left: direction === 'ltr' ? '-100%' : 'auto',
         right: direction === 'rtl' ? '-100%' : 'auto',
         width: '200%',
+        opacity: 0.15,
+        pointerEvents: 'none'
       }}
     >
       <motion.div
@@ -59,52 +61,51 @@ function FilmReel({ position, direction }) {
           x: direction === 'ltr' ? ['0%', '100%'] : ['0%', '-100%']
         }}
         transition={{
-          duration: 15,
+          duration: 20,
           ease: 'linear',
           repeat: Infinity
         }}
       >
-        {/* Film strip */}
         <div className="flex items-center" style={{ width: '200%' }}>
-          {[...Array(3)].map((_, idx) => (
+          {[...Array(2)].map((_, idx) => (
             <div key={idx} className="flex items-center">
               {/* Left perforations */}
-              <div className="flex flex-col gap-3 py-2">
+              <div className="flex flex-col gap-4 py-2">
                 {reelHoles.map((_, i) => (
                   <div
                     key={`left-${i}`}
-                    className="w-4 h-4 rounded-sm"
-                    style={{ backgroundColor: '#8B7355' }}
+                    className="w-3 h-3 rounded-full"
+                    style={{ 
+                      backgroundColor: '#8B7355',
+                      border: '1px solid #6B5345'
+                    }}
                   />
                 ))}
               </div>
               
-              {/* Film frames */}
-              <div className="mx-2">
-                {blogPosts.map((post, i) => (
-                  <div
-                    key={i}
-                    className="mb-2 px-6 py-4 rounded"
-                    style={{
-                      backgroundColor: '#8B7355',
-                      width: '300px',
-                      border: '2px solid #6B5345'
-                    }}
-                  >
-                    <div className="text-sm font-semibold" style={{ color: '#FFE4C4' }}>
-                      {post.title}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {/* Empty film strip */}
+              <div 
+                className="mx-1"
+                style={{
+                  width: '100px',
+                  height: `${reelHoles.length * 20}px`,
+                  backgroundColor: '#8B7355',
+                  border: '2px solid #6B5345',
+                  borderLeft: 'none',
+                  borderRight: 'none'
+                }}
+              />
               
               {/* Right perforations */}
-              <div className="flex flex-col gap-3 py-2">
+              <div className="flex flex-col gap-4 py-2">
                 {reelHoles.map((_, i) => (
                   <div
                     key={`right-${i}`}
-                    className="w-4 h-4 rounded-sm"
-                    style={{ backgroundColor: '#8B7355' }}
+                    className="w-3 h-3 rounded-full"
+                    style={{ 
+                      backgroundColor: '#8B7355',
+                      border: '1px solid #6B5345'
+                    }}
                   />
                 ))}
               </div>
@@ -119,39 +120,40 @@ function FilmReel({ position, direction }) {
 export default function Blog() {
   return (
     <div className="min-h-screen bg-[#0D0D0D] text-[#EDEDED] relative overflow-hidden">
-      {/* Film Reel Animations */}
-      <div className="fixed inset-0 pointer-events-none" style={{ opacity: 0.4 }}>
-        <FilmReel position="15%" direction="ltr" />
-        <FilmReel position="45%" direction="rtl" />
-        <FilmReel position="75%" direction="ltr" />
+      {/* Transparent Film Reel Animations */}
+      <div className="fixed inset-0 pointer-events-none">
+        <TransparentFilmReel position="10%" direction="ltr" />
+        <TransparentFilmReel position="40%" direction="rtl" />
+        <TransparentFilmReel position="70%" direction="ltr" />
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 max-w-6xl mx-auto px-8 py-20">
+      <div className="relative z-10 max-w-4xl mx-auto px-8 py-20">
         <h1 className="text-7xl font-bold mb-16 text-center" style={{ color: '#8BE9FD' }}>
           Blog & Updates
         </h1>
 
-        <div className="grid gap-8">
+        <div className="space-y-12">
           {blogPosts.map((post, idx) => (
             <motion.article
               key={idx}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="bg-[#161616] p-8 rounded-lg border hover:border-opacity-80 transition-all duration-300 cursor-pointer"
-              style={{ borderColor: `${post.color}40` }}
-              whileHover={{ scale: 1.02 }}
+              transition={{ delay: idx * 0.05 }}
+              className="space-y-3"
             >
-              <h2 className="text-3xl font-semibold mb-3" style={{ color: post.color }}>
+              <h2 className="text-4xl font-bold" style={{ color: post.color }}>
                 {post.title}
               </h2>
-              <p className="text-sm mb-4" style={{ color: '#6272A4' }}>
+              <p className="text-sm" style={{ color: '#6272A4' }}>
                 {post.date}
               </p>
-              <p className="text-lg leading-relaxed text-[#EDEDED]/80">
-                {post.excerpt}
+              <p className="text-lg leading-relaxed text-[#EDEDED]/85">
+                {post.content}
               </p>
+              {idx < blogPosts.length - 1 && (
+                <div className="mt-8 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(255, 121, 198, 0.2), transparent)' }} />
+              )}
             </motion.article>
           ))}
         </div>

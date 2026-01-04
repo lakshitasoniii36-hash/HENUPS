@@ -5,28 +5,33 @@ import { Code, Zap, Users, Terminal } from 'lucide-react';
 export default function Workflow() {
   return (
     <div className="min-h-screen bg-[#0D0D0D] text-[#EDEDED] relative overflow-hidden">
-      {/* Enhanced Vertical Wave Animation */}
+      {/* Enhanced Vertical Wave Animation - Full Height */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(8)].map((_, i) => (
+        {[...Array(10)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute"
             style={{
-              width: '150px',
-              height: '400px',
-              background: `linear-gradient(180deg, transparent, rgba(255, 121, 198, 0.25), rgba(255, 121, 198, 0.15), transparent)`,
-              top: '-400px',
-              left: `${i * 12}%`,
-              filter: 'blur(20px)',
+              width: '180px',
+              height: '100%',
+              background: `linear-gradient(180deg, 
+                transparent 0%, 
+                rgba(255, 121, 198, 0.15) 20%, 
+                rgba(255, 121, 198, 0.25) 40%,
+                rgba(255, 121, 198, 0.15) 60%,
+                transparent 80%
+              )`,
+              left: `${i * 10}%`,
+              filter: 'blur(25px)',
             }}
             animate={{
-              y: ['0vh', '150vh']
+              y: ['-100%', '100%']
             }}
             transition={{
-              duration: 6 + i * 1.5,
+              duration: 8 + i * 1.5,
               repeat: Infinity,
               ease: 'linear',
-              delay: i * 0.8
+              delay: i * 0.6
             }}
           />
         ))}

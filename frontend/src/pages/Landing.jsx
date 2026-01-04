@@ -6,153 +6,69 @@ const fileExtensions = [
   '.py', '.js', '.ipynb', '.ts', '.tsx', '.jsx', 
   '.java', '.c', '.cpp', '.go', '.rs', '.php', 
   '.rb', '.html', '.css', '.json', '.csv', '.sql', 
-  '.env', '.yml', '.bash', '.sh', '.md', '.txt'
+  '.env', '.yml', '.bash', '.sh', '.md', '.txt',
+  '.vue', '.svelte', '.go', '.dart', '.kt', '.swift',
+  '.r', '.scala', '.pl', '.lua', '.elm', '.ex'
 ];
 
-function Falling3DCube({ extension, delay, shouldStay }) {
-  const [position, setPosition] = useState({
-    x: Math.random() * 90 + 5,
-    y: -10,
-    z: Math.random() * 200 - 100,
-    rotateX: 0,
-    rotateY: 0,
-    rotateZ: 0
-  });
-  const [settled, setSettled] = useState(false);
+function ExtensionWall() {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
-    const fallDuration = 3000 + Math.random() * 2000;
-    const groundY = shouldStay ? 75 : 85;
-    
-    const timer = setTimeout(() => {
-      const interval = setInterval(() => {
-        setPosition(prev => {
-          if (prev.y >= groundY && !settled) {
-            setSettled(true);
-            return { ...prev, y: groundY };
-          }
-          
-          if (settled) {
-            return {
-              ...prev,
-              rotateY: prev.rotateY + 0.5
-            };
-          }
-          
-          return {
-            ...prev,
-            y: prev.y + 1.5,
-            rotateX: prev.rotateX + 5,
-            rotateY: prev.rotateY + 4,
-            rotateZ: prev.rotateZ + 3
-          };
-        });
-      }, 30);
-      
-      return () => clearInterval(interval);
-    }, delay);
-    
-    return () => clearTimeout(timer);
-  }, [delay, settled, shouldStay]);
+    const handleMouseMove = (e) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
-  const transformStyle = `
-    translateZ(${position.z}px)
-    translateX(-50%)
-    rotateX(${position.rotateX}deg)
-    rotateY(${position.rotateY}deg)
-    rotateZ(${position.rotateZ}deg)
-  `;
-
+  const rows = 12;
+  const cols = 20;
+  const totalExtensions = rows * cols;
+  
   return (
-    <div
-      className="absolute"
-      style={{
-        left: `${position.x}%`,
-        top: `${position.y}%`,
-        transform: transformStyle,
-        transformStyle: 'preserve-3d',
-        transition: settled ? 'transform 0.05s linear' : 'none'
-      }}
-    >
-      <div
-        className="relative"
-        style={{
-          width: '60px',
-          height: '60px',
-          transformStyle: 'preserve-3d'
-        }}
-      >
-        {/* Front face */}
-        <div
-          className="absolute flex items-center justify-center text-xs font-mono"
-          style={{
-            width: '60px',
-            height: '60px',
-            backgroundColor: '#1a1a2e',
-            border: '1px solid #FF79C6',
-            boxShadow: '0 0 20px rgba(255, 121, 198, 0.4)',
-            transform: 'translateZ(30px)',
-            color: '#EDEDED'
-          }}
-        >
-          {extension}
-        </div>
-        {/* Back face */}
-        <div
-          className="absolute"
-          style={{
-            width: '60px',
-            height: '60px',
-            backgroundColor: '#1a1a2e',
-            border: '1px solid #FF79C6',
-            transform: 'translateZ(-30px) rotateY(180deg)'
-          }}
-        />
-        {/* Right face */}
-        <div
-          className="absolute"
-          style={{
-            width: '60px',
-            height: '60px',
-            backgroundColor: '#161626',
-            border: '1px solid #8BE9FD',
-            transform: 'rotateY(90deg) translateZ(30px)'
-          }}
-        />
-        {/* Left face */}
-        <div
-          className="absolute"
-          style={{
-            width: '60px',
-            height: '60px',
-            backgroundColor: '#161626',
-            border: '1px solid #8BE9FD',
-            transform: 'rotateY(-90deg) translateZ(30px)'
-          }}
-        />
-        {/* Top face */}
-        <div
-          className="absolute"
-          style={{
-            width: '60px',
-            height: '60px',
-            backgroundColor: '#1f1f3e',
-            border: '1px solid #50FA7B',
-            transform: 'rotateX(90deg) translateZ(30px)'
-          }}
-        />
-        {/* Bottom face */}
-        <div
-          className="absolute"
-          style={{
-            width: '60px',
-            height: '60px',
-            backgroundColor: '#1f1f3e',
-            border: '1px solid #50FA7B',
-            transform: 'rotateX(-90deg) translateZ(30px)'
-          }}
-        />
-      </div>
+    <div className="absolute inset-0 grid" style={{
+      gridTemplateColumns: `repeat(${cols}, 1fr)`,
+      gridTemplateRows: `repeat(${rows}, 1fr)`,
+      gap: '2px'
+    }}>
+      {Array.from({ length: totalExtensions }).map((_, index) => {
+        const ext = fileExtensions[index % fileExtensions.length];
+        const row = Math.floor(index / cols);
+        const col = index % cols;
+        
+        const cellWidth = window.innerWidth / cols;
+        const cellHeight = window.innerHeight / rows;
+        const cellX = col * cellWidth + cellWidth / 2;
+        const cellY = row * cellHeight + cellHeight / 2;
+        
+        const distance = Math.sqrt(
+          Math.pow(mousePos.x - cellX, 2) + Math.pow(mousePos.y - cellY, 2)
+        );
+        
+        const glowRadius = 150;
+        const opacity = distance < glowRadius ? (1 - distance / glowRadius) * 0.9 : 0.05;
+        const scale = distance < glowRadius ? 1 + (1 - distance / glowRadius) * 0.3 : 1;
+        const glowIntensity = distance < glowRadius ? (1 - distance / glowRadius) : 0;
+        
+        return (
+          <div
+            key={index}
+            className="flex items-center justify-center text-xs font-mono transition-all duration-200"
+            style={{
+              backgroundColor: '#0D0D0D',
+              border: '1px solid rgba(255, 121, 198, 0.1)',
+              color: `rgba(237, 237, 237, ${opacity})`,
+              transform: `scale(${scale})`,
+              boxShadow: glowIntensity > 0 
+                ? `0 0 ${20 * glowIntensity}px rgba(255, 121, 198, ${0.6 * glowIntensity}), inset 0 0 ${30 * glowIntensity}px rgba(255, 121, 198, ${0.3 * glowIntensity})`
+                : 'none'
+            }}
+          >
+            {ext}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -162,32 +78,8 @@ export default function Landing() {
 
   return (
     <div className="relative w-full h-screen bg-[#0D0D0D] overflow-hidden">
-      {/* 3D Scene Container */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          perspective: '1200px',
-          perspectiveOrigin: '50% 50%'
-        }}
-      >
-        {fileExtensions.map((ext, i) => (
-          <Falling3DCube 
-            key={ext} 
-            extension={ext} 
-            delay={i * 100}
-            shouldStay={i % 4 === 0}
-          />
-        ))}
-      </div>
-
-      {/* Ground plane */}
-      <div
-        className="absolute bottom-0 left-0 right-0"
-        style={{
-          height: '2px',
-          background: 'linear-gradient(90deg, transparent, rgba(139, 233, 253, 0.3), transparent)'
-        }}
-      />
+      {/* Extension Wall Background */}
+      <ExtensionWall />
 
       {/* Content Overlay */}
       <div className="relative z-10 flex flex-col items-center justify-center h-full pointer-events-none">
