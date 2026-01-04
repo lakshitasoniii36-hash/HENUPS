@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BookOpen, FileCode, Terminal, Zap, Download } from 'lucide-react';
 import { motion, useInView } from 'framer-motion';
 
