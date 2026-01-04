@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 
 const blogPosts = [
@@ -40,60 +40,95 @@ const blogPosts = [
   }
 ];
 
-function FilmReel({ direction, items, delay }) {
+function FilmReel({ position, direction }) {
+  const reelHoles = Array.from({ length: 20 });
+  
   return (
-    <motion.div
-      className="flex gap-8 whitespace-nowrap py-4"
-      initial={{ x: direction === 'ltr' ? '-100%' : '0%' }}
-      animate={{ x: direction === 'ltr' ? '0%' : '-100%' }}
-      transition={{
-        duration: 20,
-        ease: 'linear',
-        delay: delay
+    <div
+      className="absolute flex items-center gap-2"
+      style={{
+        top: position,
+        left: direction === 'ltr' ? '-100%' : 'auto',
+        right: direction === 'rtl' ? '-100%' : 'auto',
+        width: '200%',
       }}
     >
-      {items.map((post, idx) => (
-        <div
-          key={idx}
-          className="inline-block px-6 py-4 rounded-lg border"
-          style={{
-            backgroundColor: '#161616',
-            borderColor: `${post.color}40`,
-            minWidth: '300px'
-          }}
-        >
-          <h3 className="text-xl font-semibold mb-2" style={{ color: post.color }}>
-            {post.title}
-          </h3>
-          <p className="text-sm text-[#6272A4] mb-2">{post.date}</p>
+      <motion.div
+        className="flex items-center"
+        animate={{
+          x: direction === 'ltr' ? ['0%', '100%'] : ['0%', '-100%']
+        }}
+        transition={{
+          duration: 15,
+          ease: 'linear',
+          repeat: Infinity
+        }}
+      >
+        {/* Film strip */}
+        <div className="flex items-center" style={{ width: '200%' }}>
+          {[...Array(3)].map((_, idx) => (
+            <div key={idx} className="flex items-center">
+              {/* Left perforations */}
+              <div className="flex flex-col gap-3 py-2">
+                {reelHoles.map((_, i) => (
+                  <div
+                    key={`left-${i}`}
+                    className="w-4 h-4 rounded-sm"
+                    style={{ backgroundColor: '#8B7355' }}
+                  />
+                ))}
+              </div>
+              
+              {/* Film frames */}
+              <div className="mx-2">
+                {blogPosts.map((post, i) => (
+                  <div
+                    key={i}
+                    className="mb-2 px-6 py-4 rounded"
+                    style={{
+                      backgroundColor: '#8B7355',
+                      width: '300px',
+                      border: '2px solid #6B5345'
+                    }}
+                  >
+                    <div className="text-sm font-semibold" style={{ color: '#FFE4C4' }}>
+                      {post.title}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Right perforations */}
+              <div className="flex flex-col gap-3 py-2">
+                {reelHoles.map((_, i) => (
+                  <div
+                    key={`right-${i}`}
+                    className="w-4 h-4 rounded-sm"
+                    style={{ backgroundColor: '#8B7355' }}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
-    </motion.div>
+      </motion.div>
+    </div>
   );
 }
 
 export default function Blog() {
-  const [animationComplete, setAnimationComplete] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setAnimationComplete(true), 20000);
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-[#EDEDED]">
-      {/* Film Reel Animation */}
-      {!animationComplete && (
-        <div className="fixed inset-0 flex flex-col justify-center gap-8 overflow-hidden pointer-events-none z-0">
-          <FilmReel direction="ltr" items={blogPosts.slice(0, 2)} delay={0} />
-          <FilmReel direction="rtl" items={blogPosts.slice(2, 4)} delay={0} />
-          <FilmReel direction="ltr" items={blogPosts.slice(4, 6)} delay={0} />
-        </div>
-      )}
+    <div className="min-h-screen bg-[#0D0D0D] text-[#EDEDED] relative overflow-hidden">
+      {/* Film Reel Animations */}
+      <div className="fixed inset-0 pointer-events-none" style={{ opacity: 0.4 }}>
+        <FilmReel position="15%" direction="ltr" />
+        <FilmReel position="45%" direction="rtl" />
+        <FilmReel position="75%" direction="ltr" />
+      </div>
 
       {/* Main Content */}
       <div className="relative z-10 max-w-6xl mx-auto px-8 py-20">
-        <h1 className="text-6xl font-bold mb-12" style={{ color: '#8BE9FD' }}>
+        <h1 className="text-7xl font-bold mb-16 text-center" style={{ color: '#8BE9FD' }}>
           Blog & Updates
         </h1>
 
@@ -102,10 +137,11 @@ export default function Blog() {
             <motion.article
               key={idx}
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: animationComplete ? 0 : idx * 0.1 + 0.5 }}
-              className="bg-[#161616] p-8 rounded-lg border hover:border-opacity-60 transition-all duration-300"
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              className="bg-[#161616] p-8 rounded-lg border hover:border-opacity-80 transition-all duration-300 cursor-pointer"
               style={{ borderColor: `${post.color}40` }}
+              whileHover={{ scale: 1.02 }}
             >
               <h2 className="text-3xl font-semibold mb-3" style={{ color: post.color }}>
                 {post.title}
