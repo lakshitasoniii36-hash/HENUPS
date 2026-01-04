@@ -129,24 +129,36 @@ export default function Blog() {
         }}
       />
 
-      {/* Transparent Film Reel - plays once */}
-      <div className="fixed inset-0 pointer-events-none">
-        <TransparentFilmReel position="10%" direction="ltr" />
-        <TransparentFilmReel position="40%" direction="rtl" />
-        <TransparentFilmReel position="70%" direction="ltr" />
-      </div>
-
       {/* Main Content */}
       <div className="relative z-10 max-w-4xl mx-auto px-8 py-20">
-        <motion.h1 
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-7xl font-bold mb-20 text-center" 
-          style={{ color: '#8BE9FD' }}
-        >
-          Blog & Updates
-        </motion.h1>
+        <div className="relative mb-20">
+          {/* One-time gradient sweep behind title */}
+          {!sweepComplete && (
+            <motion.div
+              className="absolute inset-0"
+              initial={{ x: '-100%' }}
+              animate={{ x: '100%' }}
+              transition={{ duration: 1.2, ease: 'easeInOut' }}
+              style={{
+                background: 'linear-gradient(90deg, transparent, rgba(255, 121, 198, 0.15), transparent)',
+                pointerEvents: 'none',
+                height: '120px',
+                top: '50%',
+                transform: 'translateY(-50%)'
+              }}
+            />
+          )}
+          
+          <motion.h1 
+            initial={{ opacity: 0, y: -30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-7xl font-bold text-center relative" 
+            style={{ color: '#8BE9FD' }}
+          >
+            Blog & Updates
+          </motion.h1>
+        </div>
 
         <div className="space-y-16">
           {blogPosts.map((post, idx) => (
