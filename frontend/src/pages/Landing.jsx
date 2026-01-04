@@ -33,7 +33,6 @@ function Falling3DCube({ extension, delay, shouldStay }) {
           }
           
           if (settled) {
-            // Slow rotation when settled
             return {
               ...prev,
               rotateY: prev.rotateY + 0.5
@@ -56,25 +55,27 @@ function Falling3DCube({ extension, delay, shouldStay }) {
     return () => clearTimeout(timer);
   }, [delay, settled, shouldStay]);
 
+  const transformStyle = `
+    translateZ(${position.z}px)
+    translateX(-50%)
+    rotateX(${position.rotateX}deg)
+    rotateY(${position.rotateY}deg)
+    rotateZ(${position.rotateZ}deg)
+  `;
+
   return (
     <div
-      className=\"absolute\"
+      className="absolute"
       style={{
         left: `${position.x}%`,
         top: `${position.y}%`,
-        transform: `
-          translateZ(${position.z}px)
-          translateX(-50%)
-          rotateX(${position.rotateX}deg)
-          rotateY(${position.rotateY}deg)
-          rotateZ(${position.rotateZ}deg)
-        `,
+        transform: transformStyle,
         transformStyle: 'preserve-3d',
         transition: settled ? 'transform 0.05s linear' : 'none'
       }}
     >
       <div
-        className=\"relative\"
+        className="relative"
         style={{
           width: '60px',
           height: '60px',
@@ -83,7 +84,7 @@ function Falling3DCube({ extension, delay, shouldStay }) {
       >
         {/* Front face */}
         <div
-          className=\"absolute flex items-center justify-center text-xs font-mono\"
+          className="absolute flex items-center justify-center text-xs font-mono"
           style={{
             width: '60px',
             height: '60px',
@@ -98,7 +99,7 @@ function Falling3DCube({ extension, delay, shouldStay }) {
         </div>
         {/* Back face */}
         <div
-          className=\"absolute\"
+          className="absolute"
           style={{
             width: '60px',
             height: '60px',
@@ -109,7 +110,7 @@ function Falling3DCube({ extension, delay, shouldStay }) {
         />
         {/* Right face */}
         <div
-          className=\"absolute\"
+          className="absolute"
           style={{
             width: '60px',
             height: '60px',
@@ -120,7 +121,7 @@ function Falling3DCube({ extension, delay, shouldStay }) {
         />
         {/* Left face */}
         <div
-          className=\"absolute\"
+          className="absolute"
           style={{
             width: '60px',
             height: '60px',
@@ -131,7 +132,7 @@ function Falling3DCube({ extension, delay, shouldStay }) {
         />
         {/* Top face */}
         <div
-          className=\"absolute\"
+          className="absolute"
           style={{
             width: '60px',
             height: '60px',
@@ -142,7 +143,7 @@ function Falling3DCube({ extension, delay, shouldStay }) {
         />
         {/* Bottom face */}
         <div
-          className=\"absolute\"
+          className="absolute"
           style={{
             width: '60px',
             height: '60px',
@@ -160,10 +161,10 @@ export default function Landing() {
   const navigate = useNavigate();
 
   return (
-    <div className=\"relative w-full h-screen bg-[#0D0D0D] overflow-hidden\">
+    <div className="relative w-full h-screen bg-[#0D0D0D] overflow-hidden">
       {/* 3D Scene Container */}
       <div 
-        className=\"absolute inset-0\"
+        className="absolute inset-0"
         style={{
           perspective: '1200px',
           perspectiveOrigin: '50% 50%'
@@ -181,7 +182,7 @@ export default function Landing() {
 
       {/* Ground plane */}
       <div
-        className=\"absolute bottom-0 left-0 right-0\"
+        className="absolute bottom-0 left-0 right-0"
         style={{
           height: '2px',
           background: 'linear-gradient(90deg, transparent, rgba(139, 233, 253, 0.3), transparent)'
@@ -189,9 +190,9 @@ export default function Landing() {
       />
 
       {/* Content Overlay */}
-      <div className=\"relative z-10 flex flex-col items-center justify-center h-full pointer-events-none\">
+      <div className="relative z-10 flex flex-col items-center justify-center h-full pointer-events-none">
         <h1 
-          className=\"text-8xl font-bold mb-6 tracking-wider\"
+          className="text-8xl font-bold mb-6 tracking-wider"
           style={{ 
             color: '#BD93F9',
             textShadow: '0 0 30px rgba(189, 147, 249, 0.6)'
@@ -200,14 +201,14 @@ export default function Landing() {
           HENU PS
         </h1>
         <p 
-          className=\"text-2xl mb-12 font-light tracking-wide\"
+          className="text-2xl mb-12 font-light tracking-wide"
           style={{ color: '#FFB86C' }}
         >
           A premium IDE experience for the modern developer
         </p>
         <Button
           onClick={() => navigate('/ide')}
-          className=\"px-12 py-6 text-lg rounded-full transition-all duration-300 hover:shadow-2xl pointer-events-auto\"
+          className="px-12 py-6 text-lg rounded-full transition-all duration-300 hover:shadow-2xl pointer-events-auto"
           style={{
             backgroundColor: '#EDEDED',
             color: '#0D0D0D',
