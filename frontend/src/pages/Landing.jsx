@@ -419,6 +419,35 @@ export default function Landing() {
             transform: translateY(-2px);
           }
         }
+        
+        @keyframes monolithRotate {
+          from {
+            transform: rotateY(0deg);
+          }
+          to {
+            transform: rotateY(360deg);
+          }
+        }
+        
+        @keyframes glowPulse {
+          0%, 100% {
+            opacity: 0.12;
+          }
+          50% {
+            opacity: 0.24;
+          }
+        }
+        
+        @keyframes buttonAura {
+          0%, 100% {
+            opacity: 0.3;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.5;
+            transform: scale(1.15);
+          }
+        }
       `}</style>
     </div>
   );
