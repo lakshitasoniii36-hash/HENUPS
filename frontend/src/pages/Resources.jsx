@@ -49,35 +49,54 @@ const resources = [
   }
 ];
 
-function StepCard({ item, stepIdx, color }) {
+function StepCard({ item, stepIdx, color, isActive }) {
   const ref = React.useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
+  const isInView = useInView(ref, { once: false, amount: 0.5 });
 
   return (
     <motion.div 
       ref={ref}
       initial={{ opacity: 0.5 }}
-      animate={{ opacity: isInView ? 1 : 0.5 }}
+      animate={{ 
+        opacity: isInView ? 1 : 0.9
+      }}
       transition={{ duration: 0.3 }}
       className="flex items-start gap-6 p-6 bg-[#0D0D0D]/50 rounded-lg"
       style={{
-        border: isInView ? `1px solid ${color}40` : '1px solid transparent',
-        transition: 'all 0.3s ease'
+        border: isInView ? `1px solid ${color}50` : `1px solid ${color}20`,
+        transition: 'all 0.3s ease',
+        opacity: isInView ? 1 : 0.85
       }}
     >
       <div className="flex-shrink-0">
         <div 
-          className="w-12 h-12 rounded-full flex items-center justify-center"
-          style={{ backgroundColor: `${color}30`, border: `2px solid ${color}` }}
+          className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300"
+          style={{ 
+            backgroundColor: isInView ? `${color}40` : `${color}30`, 
+            border: `2px solid ${color}`,
+            boxShadow: isInView ? `0 0 15px ${color}30` : 'none'
+          }}
         >
           <Download size={24} style={{ color }} />
         </div>
       </div>
       <div className="flex-1">
-        <h3 className="text-xl font-semibold mb-2" style={{ color: '#EDEDED' }}>
+        <h3 
+          className="text-xl font-semibold mb-2 transition-all duration-300" 
+          style={{ 
+            color: '#EDEDED',
+            opacity: isInView ? 1 : 0.9
+          }}
+        >
           {item.step}
         </h3>
-        <p className="text-[#EDEDED]/70 leading-relaxed">
+        <p 
+          className="leading-relaxed transition-all duration-300" 
+          style={{ 
+            color: 'rgba(237, 237, 237, 0.7)',
+            opacity: isInView ? 1 : 0.9
+          }}
+        >
           {item.description}
         </p>
       </div>
