@@ -1,6 +1,38 @@
 import React, { useState } from 'react';
-import { Send, Sparkles, Code, FileCode, Folder, Terminal as TerminalIcon } from 'lucide-react';
+import { Send, Sparkles, Code, FileCode, Folder, Terminal as TerminalIcon, FilePlus, FolderPlus, RefreshCw } from 'lucide-react';
 import { Button } from '../components/ui/button';
+
+function RippleEffect() {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+      {[...Array(5)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute rounded-full border-2"
+          style={{
+            borderColor: '#FFB86C',
+            opacity: 0,
+            animation: `ripple 4s ease-out infinite ${i * 0.8}s`
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes ripple {
+          0% {
+            width: 20px;
+            height: 20px;
+            opacity: 0.8;
+          }
+          100% {
+            width: 600px;
+            height: 600px;
+            opacity: 0;
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
 
 export default function IDE() {
   const [selectedTab, setSelectedTab] = useState('editor');
@@ -36,38 +68,56 @@ export default function IDE() {
             borderColor: '#8BE9FD40'
           }}
         >
-          {/* Electrical Wave Animation */}
+          {/* Enhanced Electrical Wave Animation - Full Width */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <div 
-              className="absolute w-1 h-full"
-              style={{
-                background: 'linear-gradient(180deg, transparent, #8BE9FD, transparent)',
-                left: '20%',
-                animation: 'wave 3s ease-in-out infinite'
-              }}
-            />
-            <div 
-              className="absolute w-1 h-full"
-              style={{
-                background: 'linear-gradient(180deg, transparent, #FF79C6, transparent)',
-                left: '80%',
-                animation: 'wave 4s ease-in-out infinite 1s'
-              }}
-            />
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-full"
+                style={{
+                  height: '100px',
+                  background: `linear-gradient(180deg, transparent, rgba(139, 233, 253, 0.15), rgba(139, 233, 253, 0.3), rgba(139, 233, 253, 0.15), transparent)`,
+                  top: '-100px',
+                  animation: `waveFlow ${4 + i}s ease-in-out infinite`,
+                  animationDelay: `${i * 1.3}s`,
+                  filter: 'blur(10px)'
+                }}
+              />
+            ))}
           </div>
           
           {/* File Tree */}
-          <div className="relative z-10 h-full overflow-y-auto">
-            <div className="p-3 border-b border-[#8BE9FD]/20">
+          <div className="relative z-10 h-full overflow-y-auto flex flex-col">
+            <div className="p-3 border-b border-[#8BE9FD]/20 flex items-center justify-between">
               <span className="text-xs font-semibold text-[#8BE9FD] uppercase tracking-wide">Explorer</span>
+              <div className="flex gap-1">
+                <button 
+                  className="p-1 hover:bg-[#8BE9FD]/20 rounded transition-colors"
+                  title="New File"
+                >
+                  <FilePlus size={14} color="#8BE9FD" />
+                </button>
+                <button 
+                  className="p-1 hover:bg-[#8BE9FD]/20 rounded transition-colors"
+                  title="New Folder"
+                >
+                  <FolderPlus size={14} color="#8BE9FD" />
+                </button>
+                <button 
+                  className="p-1 hover:bg-[#8BE9FD]/20 rounded transition-colors"
+                  title="Refresh"
+                >
+                  <RefreshCw size={14} color="#8BE9FD" />
+                </button>
+              </div>
             </div>
-            <div className="p-2">
+            <div className="p-2 flex-1">
               <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-[#0D0D0D]/50 cursor-pointer rounded">
                 <Folder size={16} color="#FFB86C" />
                 <span className="text-sm text-[#EDEDED]">src</span>
               </div>
               <div className="ml-4 space-y-1">
-                <div className="flex items-center gap-2 px-2 py-1 hover:bg-[#0D0D0D]/50 cursor-pointer rounded">
+                <div className="flex items-center gap-2 px-2 py-1 hover:bg-[#0D0D0D]/50 cursor-pointer rounded bg-[#8BE9FD]/10">
                   <FileCode size={14} color="#8BE9FD" />
                   <span className="text-xs text-[#EDEDED]">App.jsx</span>
                 </div>
@@ -103,7 +153,7 @@ export default function IDE() {
           <div className="flex-1 overflow-auto bg-[#161616] p-4">
             <pre className="text-sm font-mono leading-relaxed">
               <code>
-                <span style={{color: '#6272A4'}}>// JavaScript Sample</span>{'\n'}
+                <span style={{color: '#6272A4'}}>// JavaScript Sample</span>{' \n'}
                 <span style={{color: '#FF79C6'}}>import</span> <span style={{color: '#EDEDED'}}>React</span><span style={{color: '#FF79C6'}}>,</span> {'{ '}<span style={{color: '#EDEDED'}}>useState</span> {'}'} <span style={{color: '#FF79C6'}}>from</span> <span style={{color: '#50FA7B'}}>'react'</span><span style={{color: '#EDEDED'}}>;</span>{'\n\n'}
                 <span style={{color: '#FF79C6'}}>const</span> <span style={{color: '#8BE9FD'}}>App</span> <span style={{color: '#FF79C6'}}>=</span> <span style={{color: '#EDEDED'}}>() {'=> {'}</span>{'\n'}
                 <span style={{color: '#EDEDED'}}>  </span><span style={{color: '#FF79C6'}}>const</span> <span style={{color: '#EDEDED'}}>[count, setCount]</span> <span style={{color: '#FF79C6'}}>=</span> <span style={{color: '#8BE9FD'}}>useState</span><span style={{color: '#EDEDED'}}>(</span><span style={{color: '#FFB86C'}}>0</span><span style={{color: '#EDEDED'}}>);</span>{'\n\n'}
@@ -139,17 +189,20 @@ export default function IDE() {
           </div>
         </div>
 
-        {/* Right Sidebar - AI Assistant */}
+        {/* Right Sidebar - AI Assistant with Ripple Effect */}
         <div 
-          className="w-80 border-l bg-[#161616]"
+          className="w-80 border-l bg-[#161616] relative"
           style={{ borderColor: '#FFB86C40' }}
         >
-          <div className="px-4 py-3 border-b border-[#FFB86C]/20 flex items-center gap-2">
-            <Sparkles size={16} color="#FFB86C" />
-            <span className="text-xs font-semibold text-[#FFB86C] uppercase tracking-wide">AI Assistant</span>
-          </div>
+          {/* Ripple Animation */}
+          <RippleEffect />
           
-          <div className="flex flex-col h-full">
+          <div className="relative z-10 h-full flex flex-col">
+            <div className="px-4 py-3 border-b border-[#FFB86C]/20 flex items-center gap-2">
+              <Sparkles size={16} color="#FFB86C" />
+              <span className="text-xs font-semibold text-[#FFB86C] uppercase tracking-wide">AI Assistant</span>
+            </div>
+            
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               <div className="flex justify-start">
                 <div
@@ -194,9 +247,9 @@ export default function IDE() {
       </div>
 
       <style>{`
-        @keyframes wave {
+        @keyframes waveFlow {
           0%, 100% { transform: translateY(-100%); }
-          50% { transform: translateY(100%); }
+          50% { transform: translateY(calc(100vh + 100px)); }
         }
       `}</style>
     </div>
