@@ -48,12 +48,12 @@ function BlogArticle({ post, index }) {
   const [focusMode, setFocusMode] = useState(false);
   
   useEffect(() => {
-    if (isInView) {
+    if (isInView && !focusMode) {
       setFocusMode(true);
       const timer = setTimeout(() => setFocusMode(false), 3000);
       return () => clearTimeout(timer);
     }
-  }, [isInView]);
+  }, [isInView, focusMode]);
 
   const sentences = post.content.split('. ');
 
