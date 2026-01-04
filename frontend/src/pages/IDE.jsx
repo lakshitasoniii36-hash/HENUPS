@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Send, Sparkles, Code, FileCode, Folder, Terminal as TerminalIcon, FilePlus, FolderPlus, RefreshCw } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Send, Sparkles, FolderOpen, FilePlus, FolderPlus, RefreshCw } from 'lucide-react';
 import { Button } from '../components/ui/button';
 
 function RippleEffect() {
@@ -35,7 +36,9 @@ function RippleEffect() {
 }
 
 export default function IDE() {
-  const [selectedTab, setSelectedTab] = useState('editor');
+  const navigate = useNavigate();
+  const [folderOpened, setFolderOpened] = useState(false);
+  const [activeTab, setActiveTab] = useState('terminal');
 
   return (
     <div className="h-screen bg-[#0D0D0D] flex flex-col overflow-hidden">
@@ -48,7 +51,12 @@ export default function IDE() {
         }}
       >
         <div className="flex items-center gap-4">
-          <span className="text-[#BD93F9] font-bold text-lg">HENU PS</span>
+          <button 
+            onClick={() => navigate('/')}
+            className="text-[#BD93F9] font-bold text-lg hover:text-[#FF79C6] transition-colors cursor-pointer"
+          >
+            HENU PS
+          </button>
           <div className="flex gap-2 text-sm text-[#EDEDED]/70">
             <button className="hover:text-[#EDEDED] px-2 py-1 rounded transition-colors">File</button>
             <button className="hover:text-[#EDEDED] px-2 py-1 rounded transition-colors">Edit</button>
@@ -68,7 +76,7 @@ export default function IDE() {
             borderColor: '#8BE9FD40'
           }}
         >
-          {/* Enhanced Electrical Wave Animation - Full Width */}
+          {/* Enhanced Electrical Wave Animation */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
             {[...Array(3)].map((_, i) => (
               <div
@@ -111,80 +119,176 @@ export default function IDE() {
                 </button>
               </div>
             </div>
-            <div className="p-2 flex-1">
-              <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-[#0D0D0D]/50 cursor-pointer rounded">
-                <Folder size={16} color="#FFB86C" />
-                <span className="text-sm text-[#EDEDED]">src</span>
+            
+            {!folderOpened ? (
+              <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+                <FolderOpen size={48} color="#8BE9FD" className="mb-4 opacity-50" />
+                <p className="text-sm text-[#EDEDED]/70 mb-4">
+                  You have not yet opened a folder
+                </p>
+                <Button
+                  onClick={() => setFolderOpened(true)}
+                  className="px-4 py-2 text-sm"
+                  style={{
+                    backgroundColor: '#8BE9FD',
+                    color: '#0D0D0D'
+                  }}
+                >
+                  Open Folder
+                </Button>
               </div>
-              <div className="ml-4 space-y-1">
-                <div className="flex items-center gap-2 px-2 py-1 hover:bg-[#0D0D0D]/50 cursor-pointer rounded bg-[#8BE9FD]/10">
-                  <FileCode size={14} color="#8BE9FD" />
-                  <span className="text-xs text-[#EDEDED]">App.jsx</span>
+            ) : (
+              <div className="p-2 flex-1">
+                <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-[#0D0D0D]/50 cursor-pointer rounded">
+                  <FolderOpen size={16} color="#FFB86C" />
+                  <span className="text-sm text-[#EDEDED]">src</span>
                 </div>
-                <div className="flex items-center gap-2 px-2 py-1 hover:bg-[#0D0D0D]/50 cursor-pointer rounded">
-                  <FileCode size={14} color="#8BE9FD" />
-                  <span className="text-xs text-[#EDEDED]">index.js</span>
+                <div className="ml-4 space-y-1">
+                  <div className="flex items-center gap-2 px-2 py-1 hover:bg-[#0D0D0D]/50 cursor-pointer rounded bg-[#8BE9FD]/10">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8BE9FD" strokeWidth="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    <span className="text-xs text-[#EDEDED]">App.jsx</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-2 py-1 hover:bg-[#0D0D0D]/50 cursor-pointer rounded">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8BE9FD" strokeWidth="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    <span className="text-xs text-[#EDEDED]">index.js</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-[#0D0D0D]/50 cursor-pointer rounded mt-2">
+                  <FolderOpen size={16} color="#FFB86C" />
+                  <span className="text-sm text-[#EDEDED]">backend</span>
+                </div>
+                <div className="ml-4 space-y-1">
+                  <div className="flex items-center gap-2 px-2 py-1 hover:bg-[#0D0D0D]/50 cursor-pointer rounded">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#50FA7B" strokeWidth="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    <span className="text-xs text-[#EDEDED]">server.py</span>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-[#0D0D0D]/50 cursor-pointer rounded mt-2">
-                <Folder size={16} color="#FFB86C" />
-                <span className="text-sm text-[#EDEDED]">backend</span>
-              </div>
-              <div className="ml-4 space-y-1">
-                <div className="flex items-center gap-2 px-2 py-1 hover:bg-[#0D0D0D]/50 cursor-pointer rounded">
-                  <FileCode size={14} color="#50FA7B" />
-                  <span className="text-xs text-[#EDEDED]">server.py</span>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
         {/* Center - Editor */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Editor Tab */}
-          <div className="flex items-center gap-2 px-2 py-1 border-b border-[#FF79C6]/20 bg-[#161616]">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-[#0D0D0D] rounded-t text-sm">
-              <span className="text-[#EDEDED]">App.jsx</span>
+          {!folderOpened ? (
+            <div className="flex-1 flex items-center justify-center bg-[#161616]">
+              <div className="text-center">
+                <FolderOpen size={64} color="#8BE9FD" className="mx-auto mb-6 opacity-30" />
+                <h2 className="text-2xl font-semibold mb-2" style={{ color: '#8BE9FD' }}>
+                  No Folder Opened
+                </h2>
+                <p className="text-[#EDEDED]/50 mb-6">
+                  Open a folder to start coding
+                </p>
+                <Button
+                  onClick={() => setFolderOpened(true)}
+                  className="px-6 py-3"
+                  style={{
+                    backgroundColor: '#8BE9FD',
+                    color: '#0D0D0D'
+                  }}
+                >
+                  Open Folder
+                </Button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <>
+              {/* Editor Tab */}
+              <div className="flex items-center gap-2 px-2 py-1 border-b border-[#FF79C6]/20 bg-[#161616]">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-[#0D0D0D] rounded-t text-sm">
+                  <span className="text-[#EDEDED]">App.jsx</span>
+                </div>
+              </div>
 
-          {/* Editor Content */}
-          <div className="flex-1 overflow-auto bg-[#161616] p-4">
-            <pre className="text-sm font-mono leading-relaxed">
-              <code>
-                <span style={{color: '#6272A4'}}>// JavaScript Sample</span>{' \n'}
-                <span style={{color: '#FF79C6'}}>import</span> <span style={{color: '#EDEDED'}}>React</span><span style={{color: '#FF79C6'}}>,</span> {'{ '}<span style={{color: '#EDEDED'}}>useState</span> {'}'} <span style={{color: '#FF79C6'}}>from</span> <span style={{color: '#50FA7B'}}>'react'</span><span style={{color: '#EDEDED'}}>;</span>{'\n\n'}
-                <span style={{color: '#FF79C6'}}>const</span> <span style={{color: '#8BE9FD'}}>App</span> <span style={{color: '#FF79C6'}}>=</span> <span style={{color: '#EDEDED'}}>() {'=> {'}</span>{'\n'}
-                <span style={{color: '#EDEDED'}}>  </span><span style={{color: '#FF79C6'}}>const</span> <span style={{color: '#EDEDED'}}>[count, setCount]</span> <span style={{color: '#FF79C6'}}>=</span> <span style={{color: '#8BE9FD'}}>useState</span><span style={{color: '#EDEDED'}}>(</span><span style={{color: '#FFB86C'}}>0</span><span style={{color: '#EDEDED'}}>);</span>{'\n\n'}
-                <span style={{color: '#EDEDED'}}>  </span><span style={{color: '#FF79C6'}}>return</span> <span style={{color: '#EDEDED'}}>{'('}</span>{'\n'}
-                <span style={{color: '#EDEDED'}}>    {'<'}div{'>'}</span>{'\n'}
-                <span style={{color: '#EDEDED'}}>      {'<'}h1{'>'}HENU PS IDE{'</'}h1{'>'}</span>{'\n'}
-                <span style={{color: '#EDEDED'}}>      {'<'}button onClick={'{'}</span><span style={{color: '#8BE9FD'}}>{'() => setCount(count + 1)'}</span><span style={{color: '#EDEDED'}}>{'}'}{'>Count: {count}</'}button{'>'}</span>{'\n'}
-                <span style={{color: '#EDEDED'}}>    {'</'}div{'>'}</span>{'\n'}
-                <span style={{color: '#EDEDED'}}>  {')'};</span>{'\n'}
-                <span style={{color: '#EDEDED'}}>{'};'}</span>{'\n\n'}
-                <span style={{color: '#FF79C6'}}>export default</span> <span style={{color: '#EDEDED'}}>App;</span>
-              </code>
-            </pre>
-          </div>
+              {/* Editor Content */}
+              <div className="flex-1 overflow-auto bg-[#161616] p-4">
+                <pre className="text-sm font-mono leading-relaxed">
+                  <code>
+                    <span style={{color: '#6272A4'}}>// JavaScript Sample</span>{'\n'}
+                    <span style={{color: '#FF79C6'}}>import</span> <span style={{color: '#EDEDED'}}>React</span><span style={{color: '#FF79C6'}}>,</span> {'{ '}<span style={{color: '#EDEDED'}}>useState</span> {'}'} <span style={{color: '#FF79C6'}}>from</span> <span style={{color: '#50FA7B'}}>'react'</span><span style={{color: '#EDEDED'}}>;</span>{'\n\n'}
+                    <span style={{color: '#FF79C6'}}>const</span> <span style={{color: '#8BE9FD'}}>App</span> <span style={{color: '#FF79C6'}}>=</span> <span style={{color: '#EDEDED'}}>() {'=> {'}</span>{'\n'}
+                    <span style={{color: '#EDEDED'}}>  </span><span style={{color: '#FF79C6'}}>const</span> <span style={{color: '#EDEDED'}}>[count, setCount]</span> <span style={{color: '#FF79C6'}}>=</span> <span style={{color: '#8BE9FD'}}>useState</span><span style={{color: '#EDEDED'}}>(</span><span style={{color: '#FFB86C'}}>0</span><span style={{color: '#EDEDED'}}>);</span>{'\n\n'}
+                    <span style={{color: '#EDEDED'}}>  </span><span style={{color: '#FF79C6'}}>return</span> <span style={{color: '#EDEDED'}}>{'('}</span>{'\n'}
+                    <span style={{color: '#EDEDED'}}>    {'<'}div{'>'}</span>{'\n'}
+                    <span style={{color: '#EDEDED'}}>      {'<'}h1{'>'}HENU PS IDE{'</'}h1{'>'}</span>{'\n'}
+                    <span style={{color: '#EDEDED'}}>      {'<'}button onClick={'{'}</span><span style={{color: '#8BE9FD'}}>{'() => setCount(count + 1)'}</span><span style={{color: '#EDEDED'}}>{'}'}{'>Count: {count}</'}button{'>'}</span>{'\n'}
+                    <span style={{color: '#EDEDED'}}>    {'</'}div{'>'}</span>{'\n'}
+                    <span style={{color: '#EDEDED'}}>  {')'};</span>{'\n'}
+                    <span style={{color: '#EDEDED'}}>{'};'}</span>{'\n\n'}
+                    <span style={{color: '#FF79C6'}}>export default</span> <span style={{color: '#EDEDED'}}>App;</span>
+                  </code>
+                </pre>
+              </div>
+            </>
+          )}
 
-          {/* Bottom Terminal */}
+          {/* Bottom Panel with Tabs */}
           <div 
             className="h-64 border-t bg-[#161616]"
             style={{ borderColor: '#50FA7B40' }}
           >
-            <div className="px-4 py-2 border-b border-[#50FA7B]/20 flex items-center gap-2">
-              <TerminalIcon size={16} color="#50FA7B" />
-              <span className="text-xs font-semibold text-[#50FA7B] uppercase tracking-wide">Terminal</span>
+            {/* Tab Headers */}
+            <div className="flex items-center border-b border-[#50FA7B]/20">
+              <button
+                onClick={() => setActiveTab('terminal')}
+                className={`px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors ${
+                  activeTab === 'terminal' ? 'text-[#50FA7B] border-b-2 border-[#50FA7B]' : 'text-[#EDEDED]/50 hover:text-[#EDEDED]/80'
+                }`}
+              >
+                Terminal
+              </button>
+              <button
+                onClick={() => setActiveTab('console')}
+                className={`px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors ${
+                  activeTab === 'console' ? 'text-[#8BE9FD] border-b-2 border-[#8BE9FD]' : 'text-[#EDEDED]/50 hover:text-[#EDEDED]/80'
+                }`}
+              >
+                Console
+              </button>
+              <button
+                onClick={() => setActiveTab('problems')}
+                className={`px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors ${
+                  activeTab === 'problems' ? 'text-[#FF5555] border-b-2 border-[#FF5555]' : 'text-[#EDEDED]/50 hover:text-[#EDEDED]/80'
+                }`}
+              >
+                Problems
+              </button>
             </div>
-            <div className="p-4 font-mono text-sm overflow-auto h-full">
-              <div style={{color: '#EDEDED'}}>HENU PS Terminal v1.0.0</div>
-              <div style={{color: '#EDEDED'}}>Type "help" for available commands</div>
-              <div className="mt-2 flex items-center gap-2">
-                <span style={{color: '#50FA7B'}}>$</span>
-                <span style={{color: '#EDEDED'}} className="animate-pulse">_</span>
-              </div>
+
+            {/* Tab Content */}
+            <div className="p-4 font-mono text-sm overflow-auto h-[calc(100%-40px)]">
+              {activeTab === 'terminal' && (
+                <>
+                  <div style={{color: '#EDEDED'}}>HENU PS Terminal v1.0.0</div>
+                  <div style={{color: '#EDEDED'}}>Type "help" for available commands</div>
+                  <div className="mt-2 flex items-center gap-2">
+                    <span style={{color: '#50FA7B'}}>$</span>
+                    <span style={{color: '#EDEDED'}} className="animate-pulse">_</span>
+                  </div>
+                </>
+              )}
+              {activeTab === 'console' && (
+                <>
+                  <div style={{color: '#8BE9FD'}}>Console output will appear here</div>
+                  <div style={{color: '#EDEDED'}} className="mt-2">Ready to log messages...</div>
+                </>
+              )}
+              {activeTab === 'problems' && (
+                <>
+                  <div style={{color: '#6272A4'}}>No problems detected</div>
+                  <div style={{color: '#EDEDED'}} className="mt-2">Your code is clean ✓</div>
+                </>
+              )}
             </div>
           </div>
         </div>
