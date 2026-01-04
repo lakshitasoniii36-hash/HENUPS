@@ -1,9 +1,6 @@
-import React, { Suspense, useRef, useState, useEffect } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Text } from '@react-three/drei';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
-import * as THREE from 'three';
 
 const fileExtensions = [
   '.py', '.js', '.ipynb', '.ts', '.tsx', '.jsx', 
