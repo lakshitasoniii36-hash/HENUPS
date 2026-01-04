@@ -187,100 +187,81 @@ export default function Landing() {
       {/* Extension Wall Background */}
       <ExtensionWall />
 
-      {/* 3D Monolith - Decorative Element */}
+      {/* 3D Circular Rings - Decorative Element */}
       <div 
         className="absolute"
         style={{
           top: '50%',
           left: '50%',
-          transform: 'translate(-50%, -60%)',
+          transform: 'translate(-50%, -50%)',
           perspective: '1200px',
           zIndex: 5,
           pointerEvents: 'none'
         }}
       >
+        {/* Ring 1 - Largest, slowest */}
         <div
           style={{
-            width: '100px',
-            height: '350px',
-            position: 'relative',
-            transformStyle: 'preserve-3d',
-            animation: 'monolithRotate 100s linear infinite'
+            position: 'absolute',
+            width: '500px',
+            height: '500px',
+            borderRadius: '50%',
+            border: '2px solid rgba(180, 140, 255, 0.15)',
+            boxShadow: '0 0 20px rgba(180, 140, 255, 0.1), inset 0 0 20px rgba(180, 140, 255, 0.05)',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            animation: 'ringRotate1 80s linear infinite'
           }}
-        >
-          {/* Front face */}
-          <div
-            style={{
-              position: 'absolute',
-              width: '100px',
-              height: '350px',
-              background: 'linear-gradient(180deg, rgba(180, 140, 255, 0.15) 0%, rgba(160, 160, 180, 0.25) 50%, rgba(180, 140, 255, 0.15) 100%)',
-              transform: 'translateZ(25px)',
-              backdropFilter: 'blur(2px)',
-              border: '1px solid rgba(180, 140, 255, 0.1)'
-            }}
-          />
-          {/* Back face */}
-          <div
-            style={{
-              position: 'absolute',
-              width: '100px',
-              height: '350px',
-              background: 'linear-gradient(180deg, rgba(180, 140, 255, 0.12) 0%, rgba(160, 160, 180, 0.2) 50%, rgba(180, 140, 255, 0.12) 100%)',
-              transform: 'translateZ(-25px) rotateY(180deg)',
-              backdropFilter: 'blur(2px)',
-              border: '1px solid rgba(180, 140, 255, 0.08)'
-            }}
-          />
-          {/* Left face */}
-          <div
-            style={{
-              position: 'absolute',
-              width: '50px',
-              height: '350px',
-              background: 'linear-gradient(180deg, rgba(160, 160, 180, 0.18) 0%, rgba(140, 140, 160, 0.22) 50%, rgba(160, 160, 180, 0.18) 100%)',
-              transform: 'rotateY(-90deg) translateZ(25px)',
-              backdropFilter: 'blur(2px)',
-              border: '1px solid rgba(140, 140, 160, 0.1)'
-            }}
-          />
-          {/* Right face */}
-          <div
-            style={{
-              position: 'absolute',
-              width: '50px',
-              height: '350px',
-              background: 'linear-gradient(180deg, rgba(160, 160, 180, 0.18) 0%, rgba(140, 140, 160, 0.22) 50%, rgba(160, 160, 180, 0.18) 100%)',
-              transform: 'rotateY(90deg) translateZ(75px)',
-              backdropFilter: 'blur(2px)',
-              border: '1px solid rgba(140, 140, 160, 0.1)'
-            }}
-          />
-          {/* Top face */}
-          <div
-            style={{
-              position: 'absolute',
-              width: '100px',
-              height: '50px',
-              background: 'rgba(180, 140, 255, 0.2)',
-              transform: 'rotateX(90deg) translateZ(0px)',
-              backdropFilter: 'blur(2px)',
-              border: '1px solid rgba(180, 140, 255, 0.12)'
-            }}
-          />
-          {/* Bottom face */}
-          <div
-            style={{
-              position: 'absolute',
-              width: '100px',
-              height: '50px',
-              background: 'rgba(160, 160, 180, 0.15)',
-              transform: 'rotateX(-90deg) translateZ(350px)',
-              backdropFilter: 'blur(2px)',
-              border: '1px solid rgba(160, 160, 180, 0.1)'
-            }}
-          />
-        </div>
+        />
+        
+        {/* Ring 2 - Medium, medium speed */}
+        <div
+          style={{
+            position: 'absolute',
+            width: '400px',
+            height: '400px',
+            borderRadius: '50%',
+            border: '2px solid rgba(160, 160, 180, 0.18)',
+            boxShadow: '0 0 15px rgba(160, 160, 180, 0.12), inset 0 0 15px rgba(160, 160, 180, 0.08)',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            animation: 'ringRotate2 60s linear infinite reverse'
+          }}
+        />
+        
+        {/* Ring 3 - Smaller, faster */}
+        <div
+          style={{
+            position: 'absolute',
+            width: '320px',
+            height: '320px',
+            borderRadius: '50%',
+            border: '2px solid rgba(180, 140, 255, 0.2)',
+            boxShadow: '0 0 18px rgba(180, 140, 255, 0.15), inset 0 0 18px rgba(180, 140, 255, 0.1)',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            animation: 'ringRotate3 45s linear infinite'
+          }}
+        />
+        
+        {/* Ring 4 - Smallest, fastest */}
+        <div
+          style={{
+            position: 'absolute',
+            width: '260px',
+            height: '260px',
+            borderRadius: '50%',
+            border: '2px solid rgba(160, 160, 180, 0.22)',
+            boxShadow: '0 0 12px rgba(160, 160, 180, 0.18), inset 0 0 12px rgba(160, 160, 180, 0.12)',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            animation: 'ringRotate4 35s linear infinite reverse'
+          }}
+        />
       </div>
 
       {/* Content Overlay with micro floating */}
