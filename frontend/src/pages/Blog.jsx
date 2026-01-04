@@ -49,9 +49,12 @@ function BlogArticle({ post, index }) {
   
   useEffect(() => {
     if (isInView && !focusMode) {
-      setFocusMode(true);
-      const timer = setTimeout(() => setFocusMode(false), 3000);
-      return () => clearTimeout(timer);
+      const focusTimer = setTimeout(() => setFocusMode(true), 0);
+      const resetTimer = setTimeout(() => setFocusMode(false), 3000);
+      return () => {
+        clearTimeout(focusTimer);
+        clearTimeout(resetTimer);
+      };
     }
   }, [isInView, focusMode]);
 
