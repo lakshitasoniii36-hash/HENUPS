@@ -110,6 +110,13 @@ function BlogArticle({ post, index }) {
 }
 
 export default function Blog() {
+  const [sweepComplete, setSweepComplete] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setSweepComplete(true), 1200);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#000000] text-[#EDEDED] relative overflow-hidden">
       {/* Grain texture */}
