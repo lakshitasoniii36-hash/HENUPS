@@ -9,136 +9,59 @@ const fileExtensions = [
   '.env', '.yml', '.bash', '.sh', '.md', '.txt'
 ];
 
-function FallingCube({ position, extension, mousePos }) {
-  const meshRef = useRef();
-  const [settled, setSettled] = useState(false);
-  const initialY = position[1];
-  const velocity = useRef(0);
-  const targetX = useRef(position[0]);
-  const targetZ = useRef(position[2]);
-
-  useFrame((state, delta) => {
-    if (!meshRef.current) return;
-
-    if (!settled) {
-      velocity.current += -9.8 * delta * 0.3;
-      meshRef.current.position.y += velocity.current * delta;
-
-      if (meshRef.current.position.y <= -3) {
-        meshRef.current.position.y = -3;
-        setSettled(true);
-        velocity.current = 0;
-      }
-    } else {
-      // Subtle cursor interaction
-      const dx = mousePos.x * 10 - meshRef.current.position.x;
-      const dz = mousePos.y * 10 - meshRef.current.position.z;
-      const distance = Math.sqrt(dx * dx + dz * dz);
-      
-      if (distance < 3) {
-        const pushStrength = (3 - distance) / 3;
-        targetX.current = position[0] - dx * pushStrength * 0.5;
-        targetZ.current = position[2] - dz * pushStrength * 0.5;
-      } else {
-        targetX.current = position[0];
-        targetZ.current = position[2];
-      }
-
-      meshRef.current.position.x += (targetX.current - meshRef.current.position.x) * 0.05;
-      meshRef.current.position.z += (targetZ.current - meshRef.current.position.z) * 0.05;
-    }
-
-    meshRef.current.rotation.x += delta * 0.2;
-    meshRef.current.rotation.y += delta * 0.3;
+function FloatingExtension({ extension, delay, index }) {
+  const [position, setPosition] = useState({
+    x: Math.random() * 100,
+    y: -10
   });
 
-  return (
-    <group ref={meshRef} position={position}>
-      <mesh castShadow>
-        <boxGeometry args={[0.6, 0.6, 0.6]} />
-        <meshStandardMaterial 
-          color="#1a1a2e" 
-          emissive="#FF79C6" 
-          emissiveIntensity={0.2}
-          metalness={0.3}
-          roughness={0.4}
-        />
-      </mesh>
-      <Text
-        position={[0, 0, 0.31]}
-        fontSize={0.12}
-        color="#EDEDED"
-        anchorX="center"
-        anchorY="middle"
-      >
-        {extension}
-      </Text>
-    </group>
-  );
-}
-
-function Scene({ mousePos }) {
-  const cubePositions = fileExtensions.map((_, i) => {
-    const angle = (i / fileExtensions.length) * Math.PI * 2;
-    const radius = 4 + Math.random() * 2;
-    return [
-      Math.cos(angle) * radius,
-      10 + Math.random() * 15,
-      Math.sin(angle) * radius
-    ];
-  });
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const interval = setInterval(() => {
+        setPosition(prev => ({
+          x: prev.x + (Math.random() - 0.5) * 2,
+          y: prev.y > 110 ? -10 : prev.y + 0.5
+        }));
+      }, 50);
+      return () => clearInterval(interval);
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [delay]);
 
   return (
-    <>
-      <ambientLight intensity={0.3} />
-      <pointLight position={[10, 10, 10]} intensity={0.8} castShadow />
-      <pointLight position={[-10, -10, -10]} intensity={0.3} />
-      
-      {fileExtensions.map((ext, i) => (
-        <FallingCube 
-          key={ext} 
-          position={cubePositions[i]} 
-          extension={ext}
-          mousePos={mousePos}
-        />
-      ))}
-      
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -3, 0]} receiveShadow>
-        <planeGeometry args={[50, 50]} />
-        <meshStandardMaterial color="#0D0D0D" transparent opacity={0.5} />
-      </mesh>
-    </>
+    <div
+      className="absolute px-4 py-2 rounded-lg font-mono text-sm transition-all duration-100"
+      style={{
+        left: `${position.x}%`,
+        top: `${position.y}%`,
+        backgroundColor: '#1a1a2e',
+        color: '#EDEDED',
+        border: '1px solid #FF79C640',
+        boxShadow: '0 0 15px rgba(255, 121, 198, 0.3)',
+        transform: 'translateX(-50%)',
+        zIndex: 0
+      }}
+    >
+      {extension}
+    </div>
   );
 }
 
 export default function Landing() {
   const navigate = useNavigate();
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePos({
-        x: (e.clientX / window.innerWidth) * 2 - 1,
-        y: -(e.clientY / window.innerHeight) * 2 + 1
-      });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
 
   return (
     <div className="relative w-full h-screen bg-[#0D0D0D] overflow-hidden">
-      {/* 3D Background */}
+      {/* Floating Extensions Background */}
       <div className="absolute inset-0">
-        <Canvas
-          shadows
-          camera={{ position: [0, 2, 12], fov: 50 }}
-          style={{ background: '#0D0D0D' }}
-        >
-          <Suspense fallback={null}>
-            <Scene mousePos={mousePos} />
-          </Suspense>
-        </Canvas>
+        {fileExtensions.map((ext, i) => (
+          <FloatingExtension 
+            key={ext} 
+            extension={ext} 
+            delay={i * 200}
+            index={i}
+          />
+        ))}
       </div>
 
       {/* Content Overlay */}
@@ -168,9 +91,11 @@ export default function Landing() {
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.boxShadow = '0 0 50px rgba(237, 237, 237, 0.6)';
+            e.currentTarget.style.transform = 'scale(1.05)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.boxShadow = '0 0 30px rgba(237, 237, 237, 0.3)';
+            e.currentTarget.style.transform = 'scale(1)';
           }}
         >
           GET STARTED
