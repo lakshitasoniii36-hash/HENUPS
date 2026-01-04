@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, useInView } from 'framer-motion';
 
 const blogPosts = [
   {
@@ -42,6 +42,7 @@ const blogPosts = [
 
 function TransparentFilmReel({ position, direction }) {
   const reelHoles = Array.from({ length: 25 });
+  const [hasPlayed, setHasPlayed] = useState(false);
   
   return (
     <div
@@ -51,8 +52,9 @@ function TransparentFilmReel({ position, direction }) {
         left: direction === 'ltr' ? '-100%' : 'auto',
         right: direction === 'rtl' ? '-100%' : 'auto',
         width: '200%',
-        opacity: 0.15,
-        pointerEvents: 'none'
+        opacity: hasPlayed ? 0.05 : 0.15,
+        pointerEvents: 'none',
+        transition: 'opacity 3s ease'
       }}
     >
       <motion.div
@@ -63,13 +65,13 @@ function TransparentFilmReel({ position, direction }) {
         transition={{
           duration: 20,
           ease: 'linear',
-          repeat: Infinity
+          repeat: 0
         }}
+        onAnimationComplete={() => setHasPlayed(true)}
       >
         <div className="flex items-center" style={{ width: '200%' }}>
           {[...Array(2)].map((_, idx) => (
             <div key={idx} className="flex items-center">
-              {/* Left perforations */}
               <div className="flex flex-col gap-4 py-2">
                 {reelHoles.map((_, i) => (
                   <div
@@ -82,8 +84,6 @@ function TransparentFilmReel({ position, direction }) {
                   />
                 ))}
               </div>
-              
-              {/* Empty film strip */}
               <div 
                 className="mx-1"
                 style={{
@@ -95,8 +95,6 @@ function TransparentFilmReel({ position, direction }) {
                   borderRight: 'none'
                 }}
               />
-              
-              {/* Right perforations */}
               <div className="flex flex-col gap-4 py-2">
                 {reelHoles.map((_, i) => (
                   <div
@@ -117,10 +115,86 @@ function TransparentFilmReel({ position, direction }) {
   );
 }
 
+function BlogArticle({ post, index }) {
+  const ref = React.useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+  const [focusMode, setFocusMode] = useState(false);
+  
+  useEffect(() => {
+    if (isInView) {
+      setFocusMode(true);
+      const timer = setTimeout(() => setFocusMode(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isInView]);
+
+  const sentences = post.content.split('. ');
+
+  return (
+    <motion.article
+      ref={ref}
+      initial={{ opacity: 0 }}
+      animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+      className="space-y-4 relative"
+      style={{
+        transition: 'all 0.5s ease'
+      }}
+    >
+      <h2 
+        className="text-4xl font-bold transition-all duration-500" 
+        style={{ 
+          color: post.color,
+          transform: focusMode ? 'scale(1.02)' : 'scale(1)'
+        }}
+      >
+        {post.title}
+      </h2>
+      <p className="text-sm" style={{ color: '#6272A4' }}>
+        {post.date}
+      </p>
+      <div className="space-y-2">
+        {sentences.map((sentence, idx) => (
+          <motion.span
+            key={idx}
+            initial={{ opacity: 0 }}
+            animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+            transition={{ delay: idx * 0.08 }}
+            className="inline text-lg leading-relaxed"
+            style={{ 
+              color: focusMode ? '#EDEDED' : 'rgba(237, 237, 237, 0.85)',
+              transition: 'color 0.5s ease'
+            }}
+          >
+            {sentence}. 
+          </motion.span>
+        ))}
+      </div>
+      {index < blogPosts.length - 1 && (
+        <div 
+          className="mt-12 h-px" 
+          style={{ 
+            background: 'linear-gradient(90deg, transparent, rgba(255, 121, 198, 0.2), transparent)' 
+          }} 
+        />
+      )}
+    </motion.article>
+  );
+}
+
 export default function Blog() {
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-[#EDEDED] relative overflow-hidden">
-      {/* Transparent Film Reel Animations */}
+    <div className="min-h-screen bg-[#000000] text-[#EDEDED] relative overflow-hidden">
+      {/* Grain texture */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.03\'/%3E%3C/svg%3E")',
+          zIndex: 100,
+          mixBlendMode: 'overlay'
+        }}
+      />
+
+      {/* Transparent Film Reel - plays once */}
       <div className="fixed inset-0 pointer-events-none">
         <TransparentFilmReel position="10%" direction="ltr" />
         <TransparentFilmReel position="40%" direction="rtl" />
@@ -129,32 +203,19 @@ export default function Blog() {
 
       {/* Main Content */}
       <div className="relative z-10 max-w-4xl mx-auto px-8 py-20">
-        <h1 className="text-7xl font-bold mb-16 text-center" style={{ color: '#8BE9FD' }}>
+        <motion.h1 
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-7xl font-bold mb-20 text-center" 
+          style={{ color: '#8BE9FD' }}
+        >
           Blog & Updates
-        </h1>
+        </motion.h1>
 
-        <div className="space-y-12">
+        <div className="space-y-16">
           {blogPosts.map((post, idx) => (
-            <motion.article
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.05 }}
-              className="space-y-3"
-            >
-              <h2 className="text-4xl font-bold" style={{ color: post.color }}>
-                {post.title}
-              </h2>
-              <p className="text-sm" style={{ color: '#6272A4' }}>
-                {post.date}
-              </p>
-              <p className="text-lg leading-relaxed text-[#EDEDED]/85">
-                {post.content}
-              </p>
-              {idx < blogPosts.length - 1 && (
-                <div className="mt-8 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(255, 121, 198, 0.2), transparent)' }} />
-              )}
-            </motion.article>
+            <BlogArticle key={idx} post={post} index={idx} />
           ))}
         </div>
       </div>
