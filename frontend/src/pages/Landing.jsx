@@ -1,6 +1,6 @@
 import React, { Suspense, useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Text3D, Center } from '@react-three/drei';
+import { Text } from '@react-three/drei';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import * as THREE from 'three';
@@ -67,15 +67,15 @@ function FallingCube({ position, extension, mousePos }) {
           roughness={0.4}
         />
       </mesh>
-      <Text3D
-        font="/fonts/helvetiker_regular.typeface.json"
-        size={0.12}
-        height={0.02}
-        position={[-0.2, -0.05, 0.31]}
+      <Text
+        position={[0, 0, 0.31]}
+        fontSize={0.12}
+        color="#EDEDED"
+        anchorX="center"
+        anchorY="middle"
       >
         {extension}
-        <meshStandardMaterial color="#EDEDED" />
-      </Text3D>
+      </Text>
     </group>
   );
 }
