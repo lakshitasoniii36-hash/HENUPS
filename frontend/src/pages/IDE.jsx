@@ -58,11 +58,11 @@ function LogoTransition({ onComplete }) {
         style={{ perspective: '1000px' }}
       >
         <motion.img
-          src="https://customer-assets.emergentagent.com/job_code-obsidian/artifacts/23joipml_logo.png"
+          src="https://customer-assets.emergentagent.com/job_code-obsidian/artifacts/x12a2kz3_White%20%26%20Black%20Minimalist%20Logo%20Distro%20Fashion%20%282%29.png"
           alt="HENU PS"
           style={{
-            width: '180px',
-            height: '180px',
+            width: '200px',
+            height: 'auto',
             filter: 'drop-shadow(0 0 30px rgba(189, 147, 249, 0.4))'
           }}
           animate={{
