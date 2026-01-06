@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, Sparkles, FolderOpen, FilePlus, FolderPlus, RefreshCw } from 'lucide-react';
+import { Send, Sparkles, FolderOpen, FilePlus, FolderPlus, RefreshCw, X } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function RippleEffect() {
   return (
@@ -35,13 +36,161 @@ function RippleEffect() {
   );
 }
 
+function LogoTransition({ onComplete }) {
+  useEffect(() => {
+    const timer = setTimeout(onComplete, 400);
+    return () => clearTimeout(timer);
+  }, [onComplete]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.15 }}
+      className="fixed inset-0 bg-[#0D0D0D] flex items-center justify-center"
+      style={{ zIndex: 1000 }}
+    >
+      <motion.div
+        initial={{ scale: 0.8, rotateY: -15, rotateX: 10 }}
+        animate={{ scale: 1, rotateY: 0, rotateX: 0 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+        style={{ perspective: '1000px' }}
+      >
+        <motion.img
+          src="https://customer-assets.emergentagent.com/job_code-obsidian/artifacts/23joipml_logo.png"
+          alt="HENU PS"
+          style={{
+            width: '180px',
+            height: '180px',
+            filter: 'drop-shadow(0 0 30px rgba(189, 147, 249, 0.4))'
+          }}
+          animate={{
+            filter: [
+              'drop-shadow(0 0 30px rgba(189, 147, 249, 0.4))',
+              'drop-shadow(0 0 40px rgba(189, 147, 249, 0.6))',
+              'drop-shadow(0 0 30px rgba(189, 147, 249, 0.4))'
+            ]
+          }}
+          transition={{ duration: 0.35 }}
+        />
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function TerminalRipple() {
+  return (
+    <motion.div
+      initial={{ scaleY: 0, opacity: 0.6 }}
+      animate={{ scaleY: 1, opacity: 0 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className="absolute inset-0 pointer-events-none"
+      style={{
+        background: 'linear-gradient(180deg, rgba(80, 250, 123, 0.2) 0%, transparent 100%)',
+        transformOrigin: 'top'
+      }}
+    />
+  );
+}
+
 export default function IDE() {
   const navigate = useNavigate();
   const [folderOpened, setFolderOpened] = useState(false);
   const [activeTab, setActiveTab] = useState('terminal');
+  const [terminalVisible, setTerminalVisible] = useState(false);
+  const [showLogoTransition, setShowLogoTransition] = useState(false);
+  const [showTerminalRipple, setShowTerminalRipple] = useState(false);
+
+  // Gesture detection for terminal opening
+  useEffect(() => {
+    let lastTouchDistance = 0;
+
+    const handleWheel = (e) => {
+      // Ctrl + Scroll to open terminal
+      if (e.ctrlKey && !terminalVisible) {
+        e.preventDefault();
+        openTerminalWithAnimation();
+      }
+    };
+
+    const handleTouchStart = (e) => {
+      if (e.touches.length === 2) {
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        lastTouchDistance = Math.hypot(
+          touch2.clientX - touch1.clientX,
+          touch2.clientY - touch1.clientY
+        );
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      if (e.touches.length === 2 && !terminalVisible) {
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        const currentDistance = Math.hypot(
+          touch2.clientX - touch1.clientX,
+          touch2.clientY - touch1.clientY
+        );
+        
+        // Pinch in to open terminal
+        if (lastTouchDistance - currentDistance > 50) {
+          openTerminalWithAnimation();
+          lastTouchDistance = 0;
+        }
+      }
+    };
+
+    const handleKeyDown = (e) => {
+      // Ctrl + ` to toggle terminal
+      if (e.ctrlKey && e.key === '`') {
+        e.preventDefault();
+        if (terminalVisible) {
+          closeTerminal();
+        } else {
+          openTerminalWithAnimation();
+        }
+      }
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('touchstart', handleTouchStart);
+    window.addEventListener('touchmove', handleTouchMove);
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [terminalVisible]);
+
+  const openTerminalWithAnimation = () => {
+    setShowLogoTransition(true);
+  };
+
+  const handleLogoTransitionComplete = () => {
+    setShowLogoTransition(false);
+    setTerminalVisible(true);
+    setShowTerminalRipple(true);
+    setTimeout(() => setShowTerminalRipple(false), 300);
+  };
+
+  const closeTerminal = () => {
+    setTerminalVisible(false);
+  };
 
   return (
     <div className="h-screen bg-[#0D0D0D] flex flex-col overflow-hidden">
+      {/* Logo Transition */}
+      <AnimatePresence>
+        {showLogoTransition && (
+          <LogoTransition onComplete={handleLogoTransitionComplete} />
+        )}
+      </AnimatePresence>
+
       {/* Top Bar */}
       <div 
         className="h-12 px-4 flex items-center justify-between border-b"
@@ -76,7 +225,7 @@ export default function IDE() {
             borderColor: '#8BE9FD40'
           }}
         >
-          {/* Enhanced Electrical Wave Animation */}
+          {/* Electrical Wave Animation */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
             {[...Array(3)].map((_, i) => (
               <div
@@ -99,22 +248,13 @@ export default function IDE() {
             <div className="p-3 border-b border-[#8BE9FD]/20 flex items-center justify-between">
               <span className="text-xs font-semibold text-[#8BE9FD] uppercase tracking-wide">Explorer</span>
               <div className="flex gap-1">
-                <button 
-                  className="p-1 hover:bg-[#8BE9FD]/20 rounded transition-colors"
-                  title="New File"
-                >
+                <button className="p-1 hover:bg-[#8BE9FD]/20 rounded transition-colors" title="New File">
                   <FilePlus size={14} color="#8BE9FD" />
                 </button>
-                <button 
-                  className="p-1 hover:bg-[#8BE9FD]/20 rounded transition-colors"
-                  title="New Folder"
-                >
+                <button className="p-1 hover:bg-[#8BE9FD]/20 rounded transition-colors" title="New Folder">
                   <FolderPlus size={14} color="#8BE9FD" />
                 </button>
-                <button 
-                  className="p-1 hover:bg-[#8BE9FD]/20 rounded transition-colors"
-                  title="Refresh"
-                >
+                <button className="p-1 hover:bg-[#8BE9FD]/20 rounded transition-colors" title="Refresh">
                   <RefreshCw size={14} color="#8BE9FD" />
                 </button>
               </div>
@@ -123,16 +263,11 @@ export default function IDE() {
             {!folderOpened ? (
               <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
                 <FolderOpen size={48} color="#8BE9FD" className="mb-4 opacity-50" />
-                <p className="text-sm text-[#EDEDED]/70 mb-4">
-                  You have not yet opened a folder
-                </p>
+                <p className="text-sm text-[#EDEDED]/70 mb-4">You have not yet opened a folder</p>
                 <Button
                   onClick={() => setFolderOpened(true)}
                   className="px-4 py-2 text-sm"
-                  style={{
-                    backgroundColor: '#8BE9FD',
-                    color: '#0D0D0D'
-                  }}
+                  style={{ backgroundColor: '#8BE9FD', color: '#0D0D0D' }}
                 >
                   Open Folder
                 </Button>
@@ -177,128 +312,138 @@ export default function IDE() {
           </div>
         </div>
 
-        {/* Center - Editor */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {!folderOpened ? (
-            <div className="flex-1 flex items-center justify-center bg-[#161616]">
-              <div className="text-center">
-                <FolderOpen size={64} color="#8BE9FD" className="mx-auto mb-6 opacity-30" />
-                <h2 className="text-2xl font-semibold mb-2" style={{ color: '#8BE9FD' }}>
-                  No Folder Opened
-                </h2>
-                <p className="text-[#EDEDED]/50 mb-6">
-                  Open a folder to start coding
-                </p>
-                <Button
-                  onClick={() => setFolderOpened(true)}
-                  className="px-6 py-3"
-                  style={{
-                    backgroundColor: '#8BE9FD',
-                    color: '#0D0D0D'
-                  }}
-                >
-                  Open Folder
-                </Button>
+        {/* Center - Editor or Terminal */}
+        <div className="flex-1 flex flex-col overflow-hidden relative">
+          {!terminalVisible ? (
+            // Code Editor View
+            !folderOpened ? (
+              <div className="flex-1 flex items-center justify-center bg-[#161616]">
+                <div className="text-center">
+                  <FolderOpen size={64} color="#8BE9FD" className="mx-auto mb-6 opacity-30" />
+                  <h2 className="text-2xl font-semibold mb-2" style={{ color: '#8BE9FD' }}>No Folder Opened</h2>
+                  <p className="text-[#EDEDED]/50 mb-6">Open a folder to start coding</p>
+                  <Button
+                    onClick={() => setFolderOpened(true)}
+                    className="px-6 py-3"
+                    style={{ backgroundColor: '#8BE9FD', color: '#0D0D0D' }}
+                  >
+                    Open Folder
+                  </Button>
+                  <p className="text-xs text-[#EDEDED]/40 mt-8">
+                    Tip: Use Ctrl+` or Ctrl+Scroll to open terminal
+                  </p>
+                </div>
               </div>
-            </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 px-2 py-1 border-b border-[#FF79C6]/20 bg-[#161616]">
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-[#0D0D0D] rounded-t text-sm">
+                    <span className="text-[#EDEDED]">App.jsx</span>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-auto bg-[#161616] p-4">
+                  <pre className="text-sm font-mono leading-relaxed">
+                    <code>
+                      <span style={{color: '#6272A4'}}>// JavaScript Sample</span>{'\n'}
+                      <span style={{color: '#FF79C6'}}>import</span> <span style={{color: '#EDEDED'}}>React</span><span style={{color: '#FF79C6'}}>,</span> {'{ '}<span style={{color: '#EDEDED'}}>useState</span> {'}'} <span style={{color: '#FF79C6'}}>from</span> <span style={{color: '#50FA7B'}}>'react'</span><span style={{color: '#EDEDED'}}>;</span>{'\n\n'}
+                      <span style={{color: '#FF79C6'}}>const</span> <span style={{color: '#8BE9FD'}}>App</span> <span style={{color: '#FF79C6'}}>=</span> <span style={{color: '#EDEDED'}}>() {'=> {'}</span>{'\n'}
+                      <span style={{color: '#EDEDED'}}>  </span><span style={{color: '#FF79C6'}}>const</span> <span style={{color: '#EDEDED'}}>[count, setCount]</span> <span style={{color: '#FF79C6'}}>=</span> <span style={{color: '#8BE9FD'}}>useState</span><span style={{color: '#EDEDED'}}>(</span><span style={{color: '#FFB86C'}}>0</span><span style={{color: '#EDEDED'}}>);</span>{'\n\n'}
+                      <span style={{color: '#EDEDED'}}>  </span><span style={{color: '#FF79C6'}}>return</span> <span style={{color: '#EDEDED'}}>{'('}</span>{'\n'}
+                      <span style={{color: '#EDEDED'}}>    {'<'}div{'>'}</span>{'\n'}
+                      <span style={{color: '#EDEDED'}}>      {'<'}h1{'>'}HENU PS IDE{'</'}h1{'>'}</span>{'\n'}
+                      <span style={{color: '#EDEDED'}}>      {'<'}button onClick={'{'}</span><span style={{color: '#8BE9FD'}}>{'() => setCount(count + 1)'}</span><span style={{color: '#EDEDED'}}>{'}'}{'>Count: {count}</'}button{'>'}</span>{'\n'}
+                      <span style={{color: '#EDEDED'}}>    {'</'}div{'>'}</span>{'\n'}
+                      <span style={{color: '#EDEDED'}}>  {')'};</span>{'\n'}
+                      <span style={{color: '#EDEDED'}}>{'};'}</span>{'\n\n'}
+                      <span style={{color: '#FF79C6'}}>export default</span> <span style={{color: '#EDEDED'}}>App;</span>
+                    </code>
+                  </pre>
+                </div>
+              </>
+            )
           ) : (
-            <>
-              {/* Editor Tab */}
-              <div className="flex items-center gap-2 px-2 py-1 border-b border-[#FF79C6]/20 bg-[#161616]">
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-[#0D0D0D] rounded-t text-sm">
-                  <span className="text-[#EDEDED]">App.jsx</span>
+            // Terminal View
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="flex-1 bg-[#161616] relative flex flex-col"
+            >
+              {showTerminalRipple && <TerminalRipple />}
+              
+              {/* Terminal Close Button */}
+              <div className="p-2 border-b border-[#50FA7B]/20 flex items-center justify-between">
+                <button
+                  onClick={closeTerminal}
+                  className="flex items-center gap-2 px-3 py-1.5 hover:bg-[#50FA7B]/10 rounded transition-colors"
+                  style={{ color: '#50FA7B' }}
+                >
+                  <X size={16} />
+                  <span className="text-xs font-semibold uppercase tracking-wide">Close Terminal</span>
+                </button>
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setActiveTab('terminal')}
+                    className={`px-3 py-1 text-xs font-semibold uppercase tracking-wide transition-colors ${
+                      activeTab === 'terminal' ? 'text-[#50FA7B]' : 'text-[#EDEDED]/50 hover:text-[#EDEDED]/80'
+                    }`}
+                  >
+                    Terminal
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('console')}
+                    className={`px-3 py-1 text-xs font-semibold uppercase tracking-wide transition-colors ${
+                      activeTab === 'console' ? 'text-[#8BE9FD]' : 'text-[#EDEDED]/50 hover:text-[#EDEDED]/80'
+                    }`}
+                  >
+                    Console
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('problems')}
+                    className={`px-3 py-1 text-xs font-semibold uppercase tracking-wide transition-colors ${
+                      activeTab === 'problems' ? 'text-[#FF5555]' : 'text-[#EDEDED]/50 hover:text-[#EDEDED]/80'
+                    }`}
+                  >
+                    Problems
+                  </button>
                 </div>
               </div>
 
-              {/* Editor Content */}
-              <div className="flex-1 overflow-auto bg-[#161616] p-4">
-                <pre className="text-sm font-mono leading-relaxed">
-                  <code>
-                    <span style={{color: '#6272A4'}}>// JavaScript Sample</span>{'\n'}
-                    <span style={{color: '#FF79C6'}}>import</span> <span style={{color: '#EDEDED'}}>React</span><span style={{color: '#FF79C6'}}>,</span> {'{ '}<span style={{color: '#EDEDED'}}>useState</span> {'}'} <span style={{color: '#FF79C6'}}>from</span> <span style={{color: '#50FA7B'}}>'react'</span><span style={{color: '#EDEDED'}}>;</span>{'\n\n'}
-                    <span style={{color: '#FF79C6'}}>const</span> <span style={{color: '#8BE9FD'}}>App</span> <span style={{color: '#FF79C6'}}>=</span> <span style={{color: '#EDEDED'}}>() {'=> {'}</span>{'\n'}
-                    <span style={{color: '#EDEDED'}}>  </span><span style={{color: '#FF79C6'}}>const</span> <span style={{color: '#EDEDED'}}>[count, setCount]</span> <span style={{color: '#FF79C6'}}>=</span> <span style={{color: '#8BE9FD'}}>useState</span><span style={{color: '#EDEDED'}}>(</span><span style={{color: '#FFB86C'}}>0</span><span style={{color: '#EDEDED'}}>);</span>{'\n\n'}
-                    <span style={{color: '#EDEDED'}}>  </span><span style={{color: '#FF79C6'}}>return</span> <span style={{color: '#EDEDED'}}>{'('}</span>{'\n'}
-                    <span style={{color: '#EDEDED'}}>    {'<'}div{'>'}</span>{'\n'}
-                    <span style={{color: '#EDEDED'}}>      {'<'}h1{'>'}HENU PS IDE{'</'}h1{'>'}</span>{'\n'}
-                    <span style={{color: '#EDEDED'}}>      {'<'}button onClick={'{'}</span><span style={{color: '#8BE9FD'}}>{'() => setCount(count + 1)'}</span><span style={{color: '#EDEDED'}}>{'}'}{'>Count: {count}</'}button{'>'}</span>{'\n'}
-                    <span style={{color: '#EDEDED'}}>    {'</'}div{'>'}</span>{'\n'}
-                    <span style={{color: '#EDEDED'}}>  {')'};</span>{'\n'}
-                    <span style={{color: '#EDEDED'}}>{'};'}</span>{'\n\n'}
-                    <span style={{color: '#FF79C6'}}>export default</span> <span style={{color: '#EDEDED'}}>App;</span>
-                  </code>
-                </pre>
+              {/* Terminal Content */}
+              <div className="flex-1 p-4 font-mono text-sm overflow-auto">
+                {activeTab === 'terminal' && (
+                  <>
+                    <div style={{color: '#EDEDED'}}>HENU PS Terminal v1.0.0</div>
+                    <div style={{color: '#EDEDED'}}>Type "help" for available commands</div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <span style={{color: '#50FA7B'}}>$</span>
+                      <span style={{color: '#EDEDED'}} className="animate-pulse">_</span>
+                    </div>
+                  </>
+                )}
+                {activeTab === 'console' && (
+                  <>
+                    <div style={{color: '#8BE9FD'}}>Console output will appear here</div>
+                    <div style={{color: '#EDEDED'}} className="mt-2">Ready to log messages...</div>
+                  </>
+                )}
+                {activeTab === 'problems' && (
+                  <>
+                    <div style={{color: '#6272A4'}}>No problems detected</div>
+                    <div style={{color: '#EDEDED'}} className="mt-2">Your code is clean ✓</div>
+                  </>
+                )}
               </div>
-            </>
+            </motion.div>
           )}
-
-          {/* Bottom Panel with Tabs */}
-          <div 
-            className="h-64 border-t bg-[#161616]"
-            style={{ borderColor: '#50FA7B40' }}
-          >
-            {/* Tab Headers */}
-            <div className="flex items-center border-b border-[#50FA7B]/20">
-              <button
-                onClick={() => setActiveTab('terminal')}
-                className={`px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors ${
-                  activeTab === 'terminal' ? 'text-[#50FA7B] border-b-2 border-[#50FA7B]' : 'text-[#EDEDED]/50 hover:text-[#EDEDED]/80'
-                }`}
-              >
-                Terminal
-              </button>
-              <button
-                onClick={() => setActiveTab('console')}
-                className={`px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors ${
-                  activeTab === 'console' ? 'text-[#8BE9FD] border-b-2 border-[#8BE9FD]' : 'text-[#EDEDED]/50 hover:text-[#EDEDED]/80'
-                }`}
-              >
-                Console
-              </button>
-              <button
-                onClick={() => setActiveTab('problems')}
-                className={`px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors ${
-                  activeTab === 'problems' ? 'text-[#FF5555] border-b-2 border-[#FF5555]' : 'text-[#EDEDED]/50 hover:text-[#EDEDED]/80'
-                }`}
-              >
-                Problems
-              </button>
-            </div>
-
-            {/* Tab Content */}
-            <div className="p-4 font-mono text-sm overflow-auto h-[calc(100%-40px)]">
-              {activeTab === 'terminal' && (
-                <>
-                  <div style={{color: '#EDEDED'}}>HENU PS Terminal v1.0.0</div>
-                  <div style={{color: '#EDEDED'}}>Type "help" for available commands</div>
-                  <div className="mt-2 flex items-center gap-2">
-                    <span style={{color: '#50FA7B'}}>$</span>
-                    <span style={{color: '#EDEDED'}} className="animate-pulse">_</span>
-                  </div>
-                </>
-              )}
-              {activeTab === 'console' && (
-                <>
-                  <div style={{color: '#8BE9FD'}}>Console output will appear here</div>
-                  <div style={{color: '#EDEDED'}} className="mt-2">Ready to log messages...</div>
-                </>
-              )}
-              {activeTab === 'problems' && (
-                <>
-                  <div style={{color: '#6272A4'}}>No problems detected</div>
-                  <div style={{color: '#EDEDED'}} className="mt-2">Your code is clean ✓</div>
-                </>
-              )}
-            </div>
-          </div>
         </div>
 
-        {/* Right Sidebar - AI Assistant with Ripple Effect */}
+        {/* Right Sidebar - AI Assistant */}
         <div 
           className="w-80 border-l bg-[#161616] relative"
           style={{ borderColor: '#FFB86C40' }}
         >
-          {/* Ripple Animation */}
           <RippleEffect />
           
           <div className="relative z-10 h-full flex flex-col">
