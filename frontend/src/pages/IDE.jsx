@@ -261,26 +261,42 @@ export default function IDE() {
             borderColor: '#8BE9FD40'
           }}
         >
-          {/* Signal Spine - thin vertical indicator at left edge */}
+          {/* Signal Spine */}
           <motion.div
-            className="absolute left-0 top-0 bottom-0"
+            className="absolute left-0 top-0 bottom-0 w-0.5"
             style={{
-              width: '2px',
               background: hasError 
-                ? 'linear-gradient(180deg, transparent 10%, rgba(255, 85, 85, 0.35) 50%, transparent 90%)'
-                : 'linear-gradient(180deg, transparent 15%, rgba(189, 147, 249, 0.18) 50%, transparent 85%)',
+                ? 'linear-gradient(180deg, transparent, rgba(255, 85, 85, 0.4), transparent)'
+                : 'linear-gradient(180deg, transparent, rgba(237, 237, 237, 0.15), transparent)',
               boxShadow: hasError
-                ? '0 0 6px rgba(255, 85, 85, 0.25)'
-                : '0 0 4px rgba(189, 147, 249, 0.12)'
+                ? '0 0 8px rgba(255, 85, 85, 0.3)'
+                : '0 0 6px rgba(237, 237, 237, 0.1)'
             }}
             animate={{
-              opacity: fileOpened ? [0.25, 0.85, 0.25] : 0.25
+              opacity: fileOpened ? [0.3, 0.9, 0.3] : 0.3
             }}
             transition={{
-              duration: 0.5,
-              ease: 'easeOut'
+              duration: 0.5
             }}
           />
+          
+          {/* Electrical Wave Animation */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-full"
+                style={{
+                  height: '100px',
+                  background: `linear-gradient(180deg, transparent, rgba(139, 233, 253, 0.15), rgba(139, 233, 253, 0.3), rgba(139, 233, 253, 0.15), transparent)`,
+                  top: '-100px',
+                  animation: `waveFlow ${4 + i}s ease-in-out infinite`,
+                  animationDelay: `${i * 1.3}s`,
+                  filter: 'blur(10px)'
+                }}
+              />
+            ))}
+          </div>
           
           {/* File Tree */}
           <div className="relative z-10 h-full overflow-y-auto flex flex-col">
@@ -304,7 +320,7 @@ export default function IDE() {
                 <FolderOpen size={48} color="#8BE9FD" className="mb-4 opacity-50" />
                 <p className="text-sm text-[#EDEDED]/70 mb-4">You have not yet opened a folder</p>
                 <Button
-                  onClick={openFolderWithAnimation}
+                  onClick={() => setFolderOpened(true)}
                   className="px-4 py-2 text-sm"
                   style={{ backgroundColor: '#8BE9FD', color: '#0D0D0D' }}
                 >
@@ -364,7 +380,7 @@ export default function IDE() {
                   <h2 className="text-2xl font-semibold mb-2" style={{ color: '#8BE9FD' }}>No Folder Opened</h2>
                   <p className="text-[#EDEDED]/50 mb-6">Open a folder to start coding</p>
                   <Button
-                    onClick={openFolderWithAnimation}
+                    onClick={() => setFolderOpened(true)}
                     className="px-6 py-3"
                     style={{ backgroundColor: '#8BE9FD', color: '#0D0D0D' }}
                   >
@@ -534,7 +550,12 @@ export default function IDE() {
         </div>
       </div>
 
-
+      <style>{`
+        @keyframes waveFlow {
+          0%, 100% { transform: translateY(-100%); }
+          50% { transform: translateY(calc(100vh + 100px)); }
+        }
+      `}</style>
     </div>
   );
 }
