@@ -15,43 +15,38 @@ function LogoTransition({ onComplete }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
-      className="fixed inset-0 bg-[#0D0D0D] flex items-center justify-center"
-      style={{ zIndex: 1000 }}
+      transition={{ duration: 0.15, ease: 'easeOut' }}
+      className="fixed inset-0 flex items-center justify-center pointer-events-none"
+      style={{ zIndex: 1000, backgroundColor: 'transparent' }}
     >
-      <motion.div
+      <motion.img
+        src="/LOGO.svg"
+        alt="HENU PS"
         initial={{ 
-          scale: 0.85, 
-          rotateY: 6,
-          opacity: 0.9
+          scale: 0.88, 
+          opacity: 0
         }}
         animate={{ 
           scale: 1, 
-          rotateY: 0,
           opacity: 1
+        }}
+        exit={{
+          scale: 1.02,
+          opacity: 0
         }}
         transition={{ 
           duration: 0.4, 
-          ease: [0.34, 1.56, 0.64, 1]
+          ease: [0.25, 0.46, 0.45, 0.94]
         }}
-        style={{ 
-          perspective: '1200px',
-          transformStyle: 'preserve-3d'
+        style={{
+          width: '35vw',
+          maxWidth: '550px',
+          minWidth: '350px',
+          height: 'auto',
+          filter: 'drop-shadow(0 0 30px rgba(189, 147, 249, 0.5)) drop-shadow(0 0 60px rgba(189, 147, 249, 0.25))',
+          display: 'block'
         }}
-      >
-        <img
-          src="https://customer-assets.emergentagent.com/job_code-obsidian/artifacts/x12a2kz3_White%20%26%20Black%20Minimalist%20Logo%20Distro%20Fashion%20%282%29.png"
-          alt="HENU PS"
-          style={{
-            width: '40vw',
-            maxWidth: '650px',
-            minWidth: '450px',
-            height: 'auto',
-            filter: 'drop-shadow(0 0 45px rgba(189, 147, 249, 0.85)) drop-shadow(0 0 90px rgba(189, 147, 249, 0.45))',
-            display: 'block'
-          }}
-        />
-      </motion.div>
+      />
     </motion.div>
   );
 }
@@ -74,19 +69,7 @@ function TerminalRipple() {
 function CorePulse({ isThinking }) {
   return (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
-      {/* Background logo watermark */}
-      <img
-        src="https://customer-assets.emergentagent.com/job_code-obsidian/artifacts/x12a2kz3_White%20%26%20Black%20Minimalist%20Logo%20Distro%20Fashion%20%282%29.png"
-        alt=""
-        style={{
-          width: '280px',
-          height: 'auto',
-          opacity: 0.04,
-          position: 'absolute'
-        }}
-      />
-      
-      {/* Concentric rings */}
+      {/* Concentric rings - no logo watermark */}
       {[...Array(3)].map((_, i) => (
         <div
           key={i}
@@ -94,7 +77,7 @@ function CorePulse({ isThinking }) {
           style={{
             width: `${180 + i * 60}px`,
             height: `${180 + i * 60}px`,
-            borderColor: i % 2 === 0 ? 'rgba(189, 147, 249, 0.2)' : 'rgba(255, 121, 198, 0.15)',
+            borderColor: i % 2 === 0 ? 'rgba(189, 147, 249, 0.15)' : 'rgba(255, 121, 198, 0.1)',
             borderWidth: '1px',
             animation: `corePulse ${8 + i * 2}s ease-in-out infinite`,
             animationDelay: `${i * 0.8}s`
@@ -106,11 +89,11 @@ function CorePulse({ isThinking }) {
         @keyframes corePulse {
           0%, 100% {
             transform: scale(1);
-            opacity: 0.3;
+            opacity: 0.25;
           }
           50% {
-            transform: scale(1.08);
-            opacity: 0.6;
+            transform: scale(1.06);
+            opacity: 0.45;
           }
         }
       `}</style>
@@ -124,6 +107,7 @@ export default function IDE() {
   const [activeTab, setActiveTab] = useState('terminal');
   const [terminalVisible, setTerminalVisible] = useState(false);
   const [showLogoTransition, setShowLogoTransition] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null); // 'terminal' or 'folder'
   const [showTerminalRipple, setShowTerminalRipple] = useState(false);
   const [fileOpened, setFileOpened] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -190,14 +174,28 @@ export default function IDE() {
   }, [terminalVisible]);
 
   const openTerminalWithAnimation = () => {
+    setPendingAction('terminal');
+    setShowLogoTransition(true);
+  };
+
+  const openFolderWithAnimation = () => {
+    if (folderOpened) return; // Already open
+    setPendingAction('folder');
     setShowLogoTransition(true);
   };
 
   const handleLogoTransitionComplete = () => {
     setShowLogoTransition(false);
-    setTerminalVisible(true);
-    setShowTerminalRipple(true);
-    setTimeout(() => setShowTerminalRipple(false), 300);
+    
+    if (pendingAction === 'terminal') {
+      setTerminalVisible(true);
+      setShowTerminalRipple(true);
+      setTimeout(() => setShowTerminalRipple(false), 300);
+    } else if (pendingAction === 'folder') {
+      setFolderOpened(true);
+    }
+    
+    setPendingAction(null);
   };
 
   const closeTerminal = () => {
@@ -235,7 +233,7 @@ export default function IDE() {
             className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
           >
             <img
-              src="https://customer-assets.emergentagent.com/job_code-obsidian/artifacts/x12a2kz3_White%20%26%20Black%20Minimalist%20Logo%20Distro%20Fashion%20%282%29.png"
+              src="/LOGO.svg"
               alt="HENU PS"
               style={{
                 height: '28px',
@@ -263,42 +261,26 @@ export default function IDE() {
             borderColor: '#8BE9FD40'
           }}
         >
-          {/* Signal Spine */}
+          {/* Signal Spine - thin vertical indicator at left edge */}
           <motion.div
-            className="absolute left-0 top-0 bottom-0 w-0.5"
+            className="absolute left-0 top-0 bottom-0"
             style={{
+              width: '2px',
               background: hasError 
-                ? 'linear-gradient(180deg, transparent, rgba(255, 85, 85, 0.4), transparent)'
-                : 'linear-gradient(180deg, transparent, rgba(237, 237, 237, 0.15), transparent)',
+                ? 'linear-gradient(180deg, transparent 10%, rgba(255, 85, 85, 0.35) 50%, transparent 90%)'
+                : 'linear-gradient(180deg, transparent 15%, rgba(189, 147, 249, 0.18) 50%, transparent 85%)',
               boxShadow: hasError
-                ? '0 0 8px rgba(255, 85, 85, 0.3)'
-                : '0 0 6px rgba(237, 237, 237, 0.1)'
+                ? '0 0 6px rgba(255, 85, 85, 0.25)'
+                : '0 0 4px rgba(189, 147, 249, 0.12)'
             }}
             animate={{
-              opacity: fileOpened ? [0.3, 0.9, 0.3] : 0.3
+              opacity: fileOpened ? [0.25, 0.85, 0.25] : 0.25
             }}
             transition={{
-              duration: 0.5
+              duration: 0.5,
+              ease: 'easeOut'
             }}
           />
-          
-          {/* Electrical Wave Animation */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            {[...Array(3)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-full"
-                style={{
-                  height: '100px',
-                  background: `linear-gradient(180deg, transparent, rgba(139, 233, 253, 0.15), rgba(139, 233, 253, 0.3), rgba(139, 233, 253, 0.15), transparent)`,
-                  top: '-100px',
-                  animation: `waveFlow ${4 + i}s ease-in-out infinite`,
-                  animationDelay: `${i * 1.3}s`,
-                  filter: 'blur(10px)'
-                }}
-              />
-            ))}
-          </div>
           
           {/* File Tree */}
           <div className="relative z-10 h-full overflow-y-auto flex flex-col">
@@ -322,7 +304,7 @@ export default function IDE() {
                 <FolderOpen size={48} color="#8BE9FD" className="mb-4 opacity-50" />
                 <p className="text-sm text-[#EDEDED]/70 mb-4">You have not yet opened a folder</p>
                 <Button
-                  onClick={() => setFolderOpened(true)}
+                  onClick={openFolderWithAnimation}
                   className="px-4 py-2 text-sm"
                   style={{ backgroundColor: '#8BE9FD', color: '#0D0D0D' }}
                 >
@@ -382,7 +364,7 @@ export default function IDE() {
                   <h2 className="text-2xl font-semibold mb-2" style={{ color: '#8BE9FD' }}>No Folder Opened</h2>
                   <p className="text-[#EDEDED]/50 mb-6">Open a folder to start coding</p>
                   <Button
-                    onClick={() => setFolderOpened(true)}
+                    onClick={openFolderWithAnimation}
                     className="px-6 py-3"
                     style={{ backgroundColor: '#8BE9FD', color: '#0D0D0D' }}
                   >
@@ -552,12 +534,7 @@ export default function IDE() {
         </div>
       </div>
 
-      <style>{`
-        @keyframes waveFlow {
-          0%, 100% { transform: translateY(-100%); }
-          50% { transform: translateY(calc(100vh + 100px)); }
-        }
-      `}</style>
+
     </div>
   );
 }
