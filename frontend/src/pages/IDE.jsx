@@ -4,38 +4,6 @@ import { Send, Sparkles, FolderOpen, FilePlus, FolderPlus, RefreshCw, X } from '
 import { Button } from '../components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
-function RippleEffect() {
-  return (
-    <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
-      {[...Array(5)].map((_, i) => (
-        <div
-          key={i}
-          className="absolute rounded-full border-2"
-          style={{
-            borderColor: '#FFB86C',
-            opacity: 0,
-            animation: `ripple 4s ease-out infinite ${i * 0.8}s`
-          }}
-        />
-      ))}
-      <style>{`
-        @keyframes ripple {
-          0% {
-            width: 20px;
-            height: 20px;
-            opacity: 0.8;
-          }
-          100% {
-            width: 600px;
-            height: 600px;
-            opacity: 0;
-          }
-        }
-      `}</style>
-    </div>
-  );
-}
-
 function LogoTransition({ onComplete }) {
   useEffect(() => {
     const timer = setTimeout(onComplete, 450);
@@ -76,10 +44,10 @@ function LogoTransition({ onComplete }) {
           alt="HENU PS"
           style={{
             width: '40vw',
-            maxWidth: '600px',
-            minWidth: '400px',
+            maxWidth: '650px',
+            minWidth: '450px',
             height: 'auto',
-            filter: 'drop-shadow(0 0 40px rgba(189, 147, 249, 0.8)) drop-shadow(0 0 80px rgba(189, 147, 249, 0.4))',
+            filter: 'drop-shadow(0 0 45px rgba(189, 147, 249, 0.85)) drop-shadow(0 0 90px rgba(189, 147, 249, 0.45))',
             display: 'block'
           }}
         />
@@ -103,6 +71,53 @@ function TerminalRipple() {
   );
 }
 
+function CorePulse({ isThinking }) {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+      {/* Background logo watermark */}
+      <img
+        src="https://customer-assets.emergentagent.com/job_code-obsidian/artifacts/x12a2kz3_White%20%26%20Black%20Minimalist%20Logo%20Distro%20Fashion%20%282%29.png"
+        alt=""
+        style={{
+          width: '280px',
+          height: 'auto',
+          opacity: 0.04,
+          position: 'absolute'
+        }}
+      />
+      
+      {/* Concentric rings */}
+      {[...Array(3)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute rounded-full border"
+          style={{
+            width: `${180 + i * 60}px`,
+            height: `${180 + i * 60}px`,
+            borderColor: i % 2 === 0 ? 'rgba(189, 147, 249, 0.2)' : 'rgba(255, 121, 198, 0.15)',
+            borderWidth: '1px',
+            animation: `corePulse ${8 + i * 2}s ease-in-out infinite`,
+            animationDelay: `${i * 0.8}s`
+          }}
+        />
+      ))}
+      
+      <style>{`
+        @keyframes corePulse {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 0.3;
+          }
+          50% {
+            transform: scale(1.08);
+            opacity: 0.6;
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 export default function IDE() {
   const navigate = useNavigate();
   const [folderOpened, setFolderOpened] = useState(false);
@@ -110,13 +125,13 @@ export default function IDE() {
   const [terminalVisible, setTerminalVisible] = useState(false);
   const [showLogoTransition, setShowLogoTransition] = useState(false);
   const [showTerminalRipple, setShowTerminalRipple] = useState(false);
+  const [fileOpened, setFileOpened] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
-  // Gesture detection for terminal opening
   useEffect(() => {
     let lastTouchDistance = 0;
 
     const handleWheel = (e) => {
-      // Ctrl + Scroll to open terminal
       if (e.ctrlKey && !terminalVisible) {
         e.preventDefault();
         openTerminalWithAnimation();
@@ -143,7 +158,6 @@ export default function IDE() {
           touch2.clientY - touch1.clientY
         );
         
-        // Pinch in to open terminal
         if (lastTouchDistance - currentDistance > 50) {
           openTerminalWithAnimation();
           lastTouchDistance = 0;
@@ -152,7 +166,6 @@ export default function IDE() {
     };
 
     const handleKeyDown = (e) => {
-      // Ctrl + ` to toggle terminal
       if (e.ctrlKey && e.key === '`') {
         e.preventDefault();
         if (terminalVisible) {
@@ -191,8 +204,16 @@ export default function IDE() {
     setTerminalVisible(false);
   };
 
+  const handleFileClick = () => {
+    setFileOpened(true);
+    setTimeout(() => setFileOpened(false), 500);
+  };
+
   return (
-    <div className="h-screen bg-[#0D0D0D] flex flex-col overflow-hidden">
+    <div className="h-screen bg-[#0D0D0D] flex flex-col overflow-hidden" style={{ fontFamily: "'IBM Plex Sans', sans-serif" }}>
+      {/* Import Fonts */}
+      <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+      
       {/* Logo Transition */}
       <AnimatePresence>
         {showLogoTransition && (
@@ -211,9 +232,17 @@ export default function IDE() {
         <div className="flex items-center gap-4">
           <button 
             onClick={() => navigate('/')}
-            className="text-[#BD93F9] font-bold text-lg hover:text-[#FF79C6] transition-colors cursor-pointer"
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
           >
-            HENU PS
+            <img
+              src="https://customer-assets.emergentagent.com/job_code-obsidian/artifacts/x12a2kz3_White%20%26%20Black%20Minimalist%20Logo%20Distro%20Fashion%20%282%29.png"
+              alt="HENU PS"
+              style={{
+                height: '28px',
+                width: 'auto',
+                filter: 'drop-shadow(0 0 8px rgba(189, 147, 249, 0.4))'
+              }}
+            />
           </button>
           <div className="flex gap-2 text-sm text-[#EDEDED]/70">
             <button className="hover:text-[#EDEDED] px-2 py-1 rounded transition-colors">File</button>
@@ -226,7 +255,7 @@ export default function IDE() {
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar - File Explorer */}
+        {/* Left Sidebar - File Explorer with Signal Spine */}
         <div 
           className="w-64 border-r relative overflow-hidden"
           style={{ 
@@ -234,6 +263,25 @@ export default function IDE() {
             borderColor: '#8BE9FD40'
           }}
         >
+          {/* Signal Spine */}
+          <motion.div
+            className="absolute left-0 top-0 bottom-0 w-0.5"
+            style={{
+              background: hasError 
+                ? 'linear-gradient(180deg, transparent, rgba(255, 85, 85, 0.4), transparent)'
+                : 'linear-gradient(180deg, transparent, rgba(237, 237, 237, 0.15), transparent)',
+              boxShadow: hasError
+                ? '0 0 8px rgba(255, 85, 85, 0.3)'
+                : '0 0 6px rgba(237, 237, 237, 0.1)'
+            }}
+            animate={{
+              opacity: fileOpened ? [0.3, 0.9, 0.3] : 0.3
+            }}
+            transition={{
+              duration: 0.5
+            }}
+          />
+          
           {/* Electrical Wave Animation */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
             {[...Array(3)].map((_, i) => (
@@ -288,7 +336,10 @@ export default function IDE() {
                   <span className="text-sm text-[#EDEDED]">src</span>
                 </div>
                 <div className="ml-4 space-y-1">
-                  <div className="flex items-center gap-2 px-2 py-1 hover:bg-[#0D0D0D]/50 cursor-pointer rounded bg-[#8BE9FD]/10">
+                  <div 
+                    onClick={handleFileClick}
+                    className="flex items-center gap-2 px-2 py-1 hover:bg-[#0D0D0D]/50 cursor-pointer rounded bg-[#8BE9FD]/10"
+                  >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8BE9FD" strokeWidth="2">
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                       <polyline points="14 2 14 8 20 8"/>
@@ -324,7 +375,6 @@ export default function IDE() {
         {/* Center - Editor or Terminal */}
         <div className="flex-1 flex flex-col overflow-hidden relative">
           {!terminalVisible ? (
-            // Code Editor View
             !folderOpened ? (
               <div className="flex-1 flex items-center justify-center bg-[#161616]">
                 <div className="text-center">
@@ -350,8 +400,8 @@ export default function IDE() {
                     <span className="text-[#EDEDED]">App.jsx</span>
                   </div>
                 </div>
-                <div className="flex-1 overflow-auto bg-[#161616] p-4">
-                  <pre className="text-sm font-mono leading-relaxed">
+                <div className="flex-1 overflow-auto bg-[#161616] p-4" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                  <pre className="text-sm leading-relaxed">
                     <code>
                       <span style={{color: '#6272A4'}}>// JavaScript Sample</span>{'\n'}
                       <span style={{color: '#FF79C6'}}>import</span> <span style={{color: '#EDEDED'}}>React</span><span style={{color: '#FF79C6'}}>,</span> {'{ '}<span style={{color: '#EDEDED'}}>useState</span> {'}'} <span style={{color: '#FF79C6'}}>from</span> <span style={{color: '#50FA7B'}}>'react'</span><span style={{color: '#EDEDED'}}>;</span>{'\n\n'}
@@ -371,17 +421,16 @@ export default function IDE() {
               </>
             )
           ) : (
-            // Terminal View
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
               className="flex-1 bg-[#161616] relative flex flex-col"
+              style={{ fontFamily: "'JetBrains Mono', monospace" }}
             >
               {showTerminalRipple && <TerminalRipple />}
               
-              {/* Terminal Close Button */}
               <div className="p-2 border-b border-[#50FA7B]/20 flex items-center justify-between">
                 <button
                   onClick={closeTerminal}
@@ -419,8 +468,7 @@ export default function IDE() {
                 </div>
               </div>
 
-              {/* Terminal Content */}
-              <div className="flex-1 p-4 font-mono text-sm overflow-auto">
+              <div className="flex-1 p-4 text-sm overflow-auto">
                 {activeTab === 'terminal' && (
                   <>
                     <div style={{color: '#EDEDED'}}>HENU PS Terminal v1.0.0</div>
@@ -448,12 +496,12 @@ export default function IDE() {
           )}
         </div>
 
-        {/* Right Sidebar - AI Assistant */}
+        {/* Right Sidebar - AI Assistant with Core Pulse */}
         <div 
           className="w-80 border-l bg-[#161616] relative"
           style={{ borderColor: '#FFB86C40' }}
         >
-          <RippleEffect />
+          <CorePulse isThinking={false} />
           
           <div className="relative z-10 h-full flex flex-col">
             <div className="px-4 py-3 border-b border-[#FFB86C]/20 flex items-center gap-2">
