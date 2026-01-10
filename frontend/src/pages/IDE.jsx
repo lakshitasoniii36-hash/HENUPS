@@ -22,26 +22,26 @@ function LogoTransition({ onComplete }) {
       <motion.img
         src="/LOGO.svg"
         alt="HENU PS"
-        initial={{ 
-          scale: 0.88, 
+        initial={{
+          scale: 0.88,
           opacity: 0
         }}
-        animate={{ 
-          scale: 1, 
+        animate={{
+          scale: 1,
           opacity: 1
         }}
         exit={{
           scale: 1.02,
           opacity: 0
         }}
-        transition={{ 
-          duration: 0.4, 
+        transition={{
+          duration: 0.4,
           ease: [0.25, 0.46, 0.45, 0.94]
         }}
         style={{
-          width: '35vw',
-          maxWidth: '550px',
-          minWidth: '350px',
+          width: '43.75vw',
+          maxWidth: '687.5px',
+          minWidth: '437.5px',
           height: 'auto',
           filter: 'drop-shadow(0 0 30px rgba(189, 147, 249, 0.5)) drop-shadow(0 0 60px rgba(189, 147, 249, 0.25))',
           display: 'block'
@@ -66,37 +66,36 @@ function TerminalRipple() {
   );
 }
 
-function CorePulse({ isThinking }) {
+function AmbientIntelligence({ isTyping, isThinking, isPaused }) {
   return (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
-      {/* Concentric rings - no logo watermark */}
-      {[...Array(3)].map((_, i) => (
-        <div
-          key={i}
-          className="absolute rounded-full border"
-          style={{
-            width: `${180 + i * 60}px`,
-            height: `${180 + i * 60}px`,
-            borderColor: i % 2 === 0 ? 'rgba(189, 147, 249, 0.15)' : 'rgba(255, 121, 198, 0.1)',
-            borderWidth: '1px',
-            animation: `corePulse ${8 + i * 2}s ease-in-out infinite`,
-            animationDelay: `${i * 0.8}s`
-          }}
-        />
-      ))}
-      
-      <style>{`
-        @keyframes corePulse {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 0.25;
-          }
-          50% {
-            transform: scale(1.06);
-            opacity: 0.45;
-          }
+      {/* HENU PS Logo - Centered, Slightly Larger, Faded */}
+      <motion.img
+        src="/LOGO.svg"
+        alt=""
+        className="absolute"
+        style={{
+          width: '240px',
+          height: 'auto',
+          top: '50%',
+          transform: 'translateY(-50%)'
+        }}
+        animate={
+          isTyping
+            ? {
+              opacity: 0.10,
+              filter: 'drop-shadow(0 0 24px rgba(189, 147, 249, 0.25))'
+            }
+            : {
+              opacity: 0.06,
+              filter: 'drop-shadow(0 0 16px rgba(189, 147, 249, 0.12))'
+            }
         }
-      `}</style>
+        transition={{
+          duration: 0.6,
+          ease: "easeInOut"
+        }}
+      />
     </div>
   );
 }
@@ -111,6 +110,12 @@ export default function IDE() {
   const [showTerminalRipple, setShowTerminalRipple] = useState(false);
   const [fileOpened, setFileOpened] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [activeFile, setActiveFile] = useState(null);
+  const [explorerState, setExplorerState] = useState('empty'); // 'empty' or 'workspace'
+  const [aiTyping, setAiTyping] = useState(false);
+  const [aiThinking, setAiThinking] = useState(false);
+  const [aiPaused, setAiPaused] = useState(false);
+  const [openTabs, setOpenTabs] = useState([]);
 
   useEffect(() => {
     let lastTouchDistance = 0;
@@ -141,7 +146,7 @@ export default function IDE() {
           touch2.clientX - touch1.clientX,
           touch2.clientY - touch1.clientY
         );
-        
+
         if (lastTouchDistance - currentDistance > 50) {
           openTerminalWithAnimation();
           lastTouchDistance = 0;
@@ -186,7 +191,7 @@ export default function IDE() {
 
   const handleLogoTransitionComplete = () => {
     setShowLogoTransition(false);
-    
+
     if (pendingAction === 'terminal') {
       setTerminalVisible(true);
       setShowTerminalRipple(true);
@@ -194,7 +199,7 @@ export default function IDE() {
     } else if (pendingAction === 'folder') {
       setFolderOpened(true);
     }
-    
+
     setPendingAction(null);
   };
 
@@ -202,16 +207,43 @@ export default function IDE() {
     setTerminalVisible(false);
   };
 
-  const handleFileClick = () => {
+  const handleFileClick = (fileName) => {
+    // Add to tabs if not already open
+    if (!openTabs.includes(fileName)) {
+      setOpenTabs(prev => [...prev, fileName]);
+    }
+    // Set as active
+    setActiveFile(fileName);
     setFileOpened(true);
     setTimeout(() => setFileOpened(false), 500);
+  };
+
+  const closeTab = (fileName) => {
+    // Remove from open tabs
+    setOpenTabs(prev => prev.filter(tab => tab !== fileName));
+
+    // If closing the active file, clear active state
+    if (activeFile === fileName) {
+      setActiveFile(null);
+    }
+  };
+
+  const closeWorkspace = () => {
+    setFolderOpened(false);
+    setExplorerState('empty');
+    setActiveFile(null);
+  };
+
+  const openWorkspace = () => {
+    setFolderOpened(true);
+    setExplorerState('workspace');
   };
 
   return (
     <div className="h-screen bg-[#0D0D0D] flex flex-col overflow-hidden" style={{ fontFamily: "'IBM Plex Sans', sans-serif" }}>
       {/* Import Fonts */}
       <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-      
+
       {/* Logo Transition */}
       <AnimatePresence>
         {showLogoTransition && (
@@ -220,15 +252,15 @@ export default function IDE() {
       </AnimatePresence>
 
       {/* Top Bar */}
-      <div 
+      <div
         className="h-12 px-4 flex items-center justify-between border-b"
-        style={{ 
+        style={{
           backgroundColor: '#161616',
           borderColor: '#FF79C640'
         }}
       >
         <div className="flex items-center gap-4">
-          <button 
+          <button
             onClick={() => navigate('/')}
             className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
           >
@@ -254,9 +286,9 @@ export default function IDE() {
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar - File Explorer with Signal Spine */}
-        <div 
+        <div
           className="w-64 border-r relative overflow-hidden"
-          style={{ 
+          style={{
             backgroundColor: '#161616',
             borderColor: '#8BE9FD40'
           }}
@@ -265,7 +297,7 @@ export default function IDE() {
           <motion.div
             className="absolute left-0 top-0 bottom-0 w-0.5"
             style={{
-              background: hasError 
+              background: hasError
                 ? 'linear-gradient(180deg, transparent, rgba(255, 85, 85, 0.4), transparent)'
                 : 'linear-gradient(180deg, transparent, rgba(237, 237, 237, 0.15), transparent)',
               boxShadow: hasError
@@ -279,94 +311,143 @@ export default function IDE() {
               duration: 0.5
             }}
           />
-          
-          {/* Electrical Wave Animation */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            {[...Array(3)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-full"
-                style={{
-                  height: '100px',
-                  background: `linear-gradient(180deg, transparent, rgba(139, 233, 253, 0.15), rgba(139, 233, 253, 0.3), rgba(139, 233, 253, 0.15), transparent)`,
-                  top: '-100px',
-                  animation: `waveFlow ${4 + i}s ease-in-out infinite`,
-                  animationDelay: `${i * 1.3}s`,
-                  filter: 'blur(10px)'
-                }}
-              />
-            ))}
-          </div>
-          
-          {/* File Tree */}
-          <div className="relative z-10 h-full overflow-y-auto flex flex-col">
-            <div className="p-3 border-b border-[#8BE9FD]/20 flex items-center justify-between">
-              <span className="text-xs font-semibold text-[#8BE9FD] uppercase tracking-wide">Explorer</span>
-              <div className="flex gap-1">
-                <button className="p-1 hover:bg-[#8BE9FD]/20 rounded transition-colors" title="New File">
-                  <FilePlus size={14} color="#8BE9FD" />
-                </button>
-                <button className="p-1 hover:bg-[#8BE9FD]/20 rounded transition-colors" title="New Folder">
-                  <FolderPlus size={14} color="#8BE9FD" />
-                </button>
-                <button className="p-1 hover:bg-[#8BE9FD]/20 rounded transition-colors" title="Refresh">
-                  <RefreshCw size={14} color="#8BE9FD" />
-                </button>
-              </div>
+
+          {/* Grid Settle Animation - One-time only */}
+          {explorerState === 'workspace' && (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ opacity: 0.03 }}>
+              <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <motion.path
+                      d="M 40 0 L 0 0 0 40"
+                      fill="none"
+                      stroke="#8BE9FD"
+                      strokeWidth="0.5"
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 1 }}
+                      transition={{ duration: 1.2, ease: "easeOut" }}
+                    />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+              </svg>
             </div>
-            
-            {!folderOpened ? (
-              <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-                <FolderOpen size={48} color="#8BE9FD" className="mb-4 opacity-50" />
-                <p className="text-sm text-[#EDEDED]/70 mb-4">You have not yet opened a folder</p>
-                <Button
-                  onClick={() => setFolderOpened(true)}
-                  className="px-4 py-2 text-sm"
-                  style={{ backgroundColor: '#8BE9FD', color: '#0D0D0D' }}
+          )}
+
+          {/* File Tree */}
+          <div className="relative z-10 h-full overflow-hidden flex flex-col">
+            <AnimatePresence mode="wait">
+              {explorerState === 'empty' ? (
+                <motion.div
+                  key="empty-state"
+                  initial={{ opacity: 0, z: -20, scale: 0.98 }}
+                  animate={{ opacity: 1, z: 0, scale: 1 }}
+                  exit={{ opacity: 0, z: -20, scale: 0.98 }}
+                  transition={{ duration: 0.21, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  className="flex-1 flex flex-col items-center justify-center p-6 text-center"
                 >
-                  Open Folder
-                </Button>
-              </div>
-            ) : (
-              <div className="p-2 flex-1">
-                <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-[#0D0D0D]/50 cursor-pointer rounded">
-                  <FolderOpen size={16} color="#FFB86C" />
-                  <span className="text-sm text-[#EDEDED]">src</span>
-                </div>
-                <div className="ml-4 space-y-1">
-                  <div 
-                    onClick={handleFileClick}
-                    className="flex items-center gap-2 px-2 py-1 hover:bg-[#0D0D0D]/50 cursor-pointer rounded bg-[#8BE9FD]/10"
+                  <FolderOpen size={48} color="#8BE9FD" className="mb-4 opacity-50" />
+                  <p className="text-sm text-[#EDEDED]/70 mb-4">You have not yet opened a folder</p>
+                  <Button
+                    onClick={openWorkspace}
+                    className="px-4 py-2 text-sm"
+                    style={{ backgroundColor: '#8BE9FD', color: '#0D0D0D' }}
                   >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8BE9FD" strokeWidth="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                      <polyline points="14 2 14 8 20 8"/>
-                    </svg>
-                    <span className="text-xs text-[#EDEDED]">App.jsx</span>
+                    Open Folder
+                  </Button>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="workspace-state"
+                  initial={{ opacity: 0, z: -20, scale: 0.98 }}
+                  animate={{ opacity: 1, z: 0, scale: 1 }}
+                  exit={{ opacity: 0, z: -20, scale: 0.98 }}
+                  transition={{ duration: 0.21, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  className="flex-1 flex flex-col overflow-hidden"
+                >
+                  {/* Workspace Header */}
+                  <div className="p-3 border-b border-[#8BE9FD]/20 flex items-center justify-between">
+                    <span className="text-xs font-medium text-[#EDEDED]/80">my-project</span>
+                    <div className="flex gap-1">
+                      <button
+                        className="p-1 opacity-40 hover:opacity-100 rounded transition-opacity"
+                        title="New File"
+                      >
+                        <FilePlus size={14} color="#8BE9FD" />
+                      </button>
+                      <button
+                        className="p-1 opacity-40 hover:opacity-100 rounded transition-opacity"
+                        title="New Folder"
+                      >
+                        <FolderPlus size={14} color="#8BE9FD" />
+                      </button>
+                      <button
+                        className="p-1 opacity-40 hover:opacity-100 rounded transition-opacity"
+                        title="Refresh"
+                      >
+                        <RefreshCw size={14} color="#8BE9FD" />
+                      </button>
+                      <button
+                        onClick={closeWorkspace}
+                        className="p-1 opacity-40 hover:opacity-100 rounded transition-opacity"
+                        title="Close Workspace"
+                      >
+                        <X size={14} color="#8BE9FD" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 px-2 py-1 hover:bg-[#0D0D0D]/50 cursor-pointer rounded">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8BE9FD" strokeWidth="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                      <polyline points="14 2 14 8 20 8"/>
-                    </svg>
-                    <span className="text-xs text-[#EDEDED]">index.js</span>
+
+                  {/* File Tree */}
+                  <div className="p-2 flex-1 overflow-y-auto">
+                    <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-[#0D0D0D]/50 cursor-pointer rounded">
+                      <FolderOpen size={16} color="#FFB86C" />
+                      <span className="text-sm text-[#EDEDED]">src</span>
+                    </div>
+                    <div className="ml-4 space-y-1">
+                      <div
+                        onClick={() => handleFileClick('App.jsx')}
+                        className={`flex items-center gap-2 px-2 py-1 hover:bg-[#0D0D0D]/50 cursor-pointer rounded transition-colors ${activeFile === 'App.jsx' ? 'bg-[#8BE9FD]/10 border-l-2 border-[#8BE9FD]' : ''
+                          }`}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8BE9FD" strokeWidth="2">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <polyline points="14 2 14 8 20 8" />
+                        </svg>
+                        <span className="text-xs text-[#EDEDED]">App.jsx</span>
+                      </div>
+                      <div
+                        onClick={() => handleFileClick('index.js')}
+                        className={`flex items-center gap-2 px-2 py-1 hover:bg-[#0D0D0D]/50 cursor-pointer rounded transition-colors ${activeFile === 'index.js' ? 'bg-[#8BE9FD]/10 border-l-2 border-[#8BE9FD]' : ''
+                          }`}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8BE9FD" strokeWidth="2">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <polyline points="14 2 14 8 20 8" />
+                        </svg>
+                        <span className="text-xs text-[#EDEDED]">index.js</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-[#0D0D0D]/50 cursor-pointer rounded mt-2">
+                      <FolderOpen size={16} color="#FFB86C" />
+                      <span className="text-sm text-[#EDEDED]">backend</span>
+                    </div>
+                    <div className="ml-4 space-y-1">
+                      <div
+                        onClick={() => handleFileClick('server.py')}
+                        className={`flex items-center gap-2 px-2 py-1 hover:bg-[#0D0D0D]/50 cursor-pointer rounded transition-colors ${activeFile === 'server.py' ? 'bg-[#8BE9FD]/10 border-l-2 border-[#8BE9FD]' : ''
+                          }`}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#50FA7B" strokeWidth="2">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <polyline points="14 2 14 8 20 8" />
+                        </svg>
+                        <span className="text-xs text-[#EDEDED]">server.py</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-[#0D0D0D]/50 cursor-pointer rounded mt-2">
-                  <FolderOpen size={16} color="#FFB86C" />
-                  <span className="text-sm text-[#EDEDED]">backend</span>
-                </div>
-                <div className="ml-4 space-y-1">
-                  <div className="flex items-center gap-2 px-2 py-1 hover:bg-[#0D0D0D]/50 cursor-pointer rounded">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#50FA7B" strokeWidth="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                      <polyline points="14 2 14 8 20 8"/>
-                    </svg>
-                    <span className="text-xs text-[#EDEDED]">server.py</span>
-                  </div>
-                </div>
-              </div>
-            )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
@@ -380,7 +461,7 @@ export default function IDE() {
                   <h2 className="text-2xl font-semibold mb-2" style={{ color: '#8BE9FD' }}>No Folder Opened</h2>
                   <p className="text-[#EDEDED]/50 mb-6">Open a folder to start coding</p>
                   <Button
-                    onClick={() => setFolderOpened(true)}
+                    onClick={openWorkspace}
                     className="px-6 py-3"
                     style={{ backgroundColor: '#8BE9FD', color: '#0D0D0D' }}
                   >
@@ -393,29 +474,54 @@ export default function IDE() {
               </div>
             ) : (
               <>
-                <div className="flex items-center gap-2 px-2 py-1 border-b border-[#FF79C6]/20 bg-[#161616]">
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-[#0D0D0D] rounded-t text-sm">
-                    <span className="text-[#EDEDED]">App.jsx</span>
-                  </div>
-                </div>
-                <div className="flex-1 overflow-auto bg-[#161616] p-4" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                  <pre className="text-sm leading-relaxed">
-                    <code>
-                      <span style={{color: '#6272A4'}}>// JavaScript Sample</span>{'\n'}
-                      <span style={{color: '#FF79C6'}}>import</span> <span style={{color: '#EDEDED'}}>React</span><span style={{color: '#FF79C6'}}>,</span> {'{ '}<span style={{color: '#EDEDED'}}>useState</span> {'}'} <span style={{color: '#FF79C6'}}>from</span> <span style={{color: '#50FA7B'}}>'react'</span><span style={{color: '#EDEDED'}}>;</span>{'\n\n'}
-                      <span style={{color: '#FF79C6'}}>const</span> <span style={{color: '#8BE9FD'}}>App</span> <span style={{color: '#FF79C6'}}>=</span> <span style={{color: '#EDEDED'}}>() {'=> {'}</span>{'\n'}
-                      <span style={{color: '#EDEDED'}}>  </span><span style={{color: '#FF79C6'}}>const</span> <span style={{color: '#EDEDED'}}>[count, setCount]</span> <span style={{color: '#FF79C6'}}>=</span> <span style={{color: '#8BE9FD'}}>useState</span><span style={{color: '#EDEDED'}}>(</span><span style={{color: '#FFB86C'}}>0</span><span style={{color: '#EDEDED'}}>);</span>{'\n\n'}
-                      <span style={{color: '#EDEDED'}}>  </span><span style={{color: '#FF79C6'}}>return</span> <span style={{color: '#EDEDED'}}>{'('}</span>{'\n'}
-                      <span style={{color: '#EDEDED'}}>    {'<'}div{'>'}</span>{'\n'}
-                      <span style={{color: '#EDEDED'}}>      {'<'}h1{'>'}HENU PS IDE{'</'}h1{'>'}</span>{'\n'}
-                      <span style={{color: '#EDEDED'}}>      {'<'}button onClick={'{'}</span><span style={{color: '#8BE9FD'}}>{'() => setCount(count + 1)'}</span><span style={{color: '#EDEDED'}}>{'}'}{'>Count: {count}</'}button{'>'}</span>{'\n'}
-                      <span style={{color: '#EDEDED'}}>    {'</'}div{'>'}</span>{'\n'}
-                      <span style={{color: '#EDEDED'}}>  {')'};</span>{'\n'}
-                      <span style={{color: '#EDEDED'}}>{'};'}</span>{'\n\n'}
-                      <span style={{color: '#FF79C6'}}>export default</span> <span style={{color: '#EDEDED'}}>App;</span>
-                    </code>
-                  </pre>
-                </div>
+                {/* Tab Bar - dynamically render all open tabs */}
+                {openTabs.length > 0 ? (
+                  <>
+                    <div className="flex items-center gap-2 px-2 py-1 border-b border-[#FF79C6]/20 bg-[#161616]">
+                      {openTabs.map((tabName) => (
+                        <div
+                          key={tabName}
+                          className={`flex items-center gap-2 px-3 py-1.5 rounded-t text-sm cursor-pointer ${activeFile === tabName ? 'bg-[#0D0D0D]' : 'bg-[#161616] hover:bg-[#0D0D0D]/50'
+                            }`}
+                          onClick={() => setActiveFile(tabName)}
+                        >
+                          <span className="text-[#EDEDED]">{tabName}</span>
+                          <button
+                            className="ml-1 opacity-50 hover:opacity-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              closeTab(tabName);
+                            }}
+                            title="Close"
+                          >
+                            <X size={14} color="#EDEDED" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex-1 overflow-auto bg-[#161616] p-4" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                      <pre className="text-sm leading-relaxed">
+                        <code>
+                          <span style={{ color: '#6272A4' }}>// JavaScript Sample</span>{'\n'}
+                          <span style={{ color: '#FF79C6' }}>import</span> <span style={{ color: '#EDEDED' }}>React</span><span style={{ color: '#FF79C6' }}>,</span> {'{ '}<span style={{ color: '#EDEDED' }}>useState</span> {'}'} <span style={{ color: '#FF79C6' }}>from</span> <span style={{ color: '#50FA7B' }}>'react'</span><span style={{ color: '#EDEDED' }}>;</span>{'\n\n'}
+                          <span style={{ color: '#FF79C6' }}>const</span> <span style={{ color: '#8BE9FD' }}>App</span> <span style={{ color: '#FF79C6' }}>=</span> <span style={{ color: '#EDEDED' }}>() {'=> {'}</span>{'\n'}
+                          <span style={{ color: '#EDEDED' }}>  </span><span style={{ color: '#FF79C6' }}>const</span> <span style={{ color: '#EDEDED' }}>[count, setCount]</span> <span style={{ color: '#FF79C6' }}>=</span> <span style={{ color: '#8BE9FD' }}>useState</span><span style={{ color: '#EDEDED' }}>(</span><span style={{ color: '#FFB86C' }}>0</span><span style={{ color: '#EDEDED' }}>);</span>{'\n\n'}
+                          <span style={{ color: '#EDEDED' }}>  </span><span style={{ color: '#FF79C6' }}>return</span> <span style={{ color: '#EDEDED' }}>{'('}</span>{'\n'}
+                          <span style={{ color: '#EDEDED' }}>    {'<'}div{'>'}</span>{'\n'}
+                          <span style={{ color: '#EDEDED' }}>      {'<'}h1{'>'}HENU PS IDE{'</'}h1{'>'}</span>{'\n'}
+                          <span style={{ color: '#EDEDED' }}>      {'<'}button onClick={'{'}</span><span style={{ color: '#8BE9FD' }}>{'() => setCount(count + 1)'}</span><span style={{ color: '#EDEDED' }}>{'}'}{'>Count: {count}</'}button{'>'}</span>{'\n'}
+                          <span style={{ color: '#EDEDED' }}>    {'</'}div{'>'}</span>{'\n'}
+                          <span style={{ color: '#EDEDED' }}>  {')'};</span>{'\n'}
+                          <span style={{ color: '#EDEDED' }}>{'};'}</span>{'\n\n'}
+                          <span style={{ color: '#FF79C6' }}>export default</span> <span style={{ color: '#EDEDED' }}>App;</span>
+                        </code>
+                      </pre>
+                    </div>
+                  </>
+                ) : (
+                  // Blank editor when no tabs are open
+                  <div className="flex-1 bg-[#161616]"></div>
+                )}
               </>
             )
           ) : (
@@ -428,7 +534,7 @@ export default function IDE() {
               style={{ fontFamily: "'JetBrains Mono', monospace" }}
             >
               {showTerminalRipple && <TerminalRipple />}
-              
+
               <div className="p-2 border-b border-[#50FA7B]/20 flex items-center justify-between">
                 <button
                   onClick={closeTerminal}
@@ -441,25 +547,22 @@ export default function IDE() {
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => setActiveTab('terminal')}
-                    className={`px-3 py-1 text-xs font-semibold uppercase tracking-wide transition-colors ${
-                      activeTab === 'terminal' ? 'text-[#50FA7B]' : 'text-[#EDEDED]/50 hover:text-[#EDEDED]/80'
-                    }`}
+                    className={`px-3 py-1 text-xs font-semibold uppercase tracking-wide transition-colors ${activeTab === 'terminal' ? 'text-[#50FA7B]' : 'text-[#EDEDED]/50 hover:text-[#EDEDED]/80'
+                      }`}
                   >
                     Terminal
                   </button>
                   <button
                     onClick={() => setActiveTab('console')}
-                    className={`px-3 py-1 text-xs font-semibold uppercase tracking-wide transition-colors ${
-                      activeTab === 'console' ? 'text-[#8BE9FD]' : 'text-[#EDEDED]/50 hover:text-[#EDEDED]/80'
-                    }`}
+                    className={`px-3 py-1 text-xs font-semibold uppercase tracking-wide transition-colors ${activeTab === 'console' ? 'text-[#8BE9FD]' : 'text-[#EDEDED]/50 hover:text-[#EDEDED]/80'
+                      }`}
                   >
                     Console
                   </button>
                   <button
                     onClick={() => setActiveTab('problems')}
-                    className={`px-3 py-1 text-xs font-semibold uppercase tracking-wide transition-colors ${
-                      activeTab === 'problems' ? 'text-[#FF5555]' : 'text-[#EDEDED]/50 hover:text-[#EDEDED]/80'
-                    }`}
+                    className={`px-3 py-1 text-xs font-semibold uppercase tracking-wide transition-colors ${activeTab === 'problems' ? 'text-[#FF5555]' : 'text-[#EDEDED]/50 hover:text-[#EDEDED]/80'
+                      }`}
                   >
                     Problems
                   </button>
@@ -469,24 +572,24 @@ export default function IDE() {
               <div className="flex-1 p-4 text-sm overflow-auto">
                 {activeTab === 'terminal' && (
                   <>
-                    <div style={{color: '#EDEDED'}}>HENU PS Terminal v1.0.0</div>
-                    <div style={{color: '#EDEDED'}}>Type "help" for available commands</div>
+                    <div style={{ color: '#EDEDED' }}>HENU PS Terminal v1.0.0</div>
+                    <div style={{ color: '#EDEDED' }}>Type "help" for available commands</div>
                     <div className="mt-2 flex items-center gap-2">
-                      <span style={{color: '#50FA7B'}}>$</span>
-                      <span style={{color: '#EDEDED'}} className="animate-pulse">_</span>
+                      <span style={{ color: '#50FA7B' }}>$</span>
+                      <span style={{ color: '#EDEDED' }} className="animate-pulse">_</span>
                     </div>
                   </>
                 )}
                 {activeTab === 'console' && (
                   <>
-                    <div style={{color: '#8BE9FD'}}>Console output will appear here</div>
-                    <div style={{color: '#EDEDED'}} className="mt-2">Ready to log messages...</div>
+                    <div style={{ color: '#8BE9FD' }}>Console output will appear here</div>
+                    <div style={{ color: '#EDEDED' }} className="mt-2">Ready to log messages...</div>
                   </>
                 )}
                 {activeTab === 'problems' && (
                   <>
-                    <div style={{color: '#6272A4'}}>No problems detected</div>
-                    <div style={{color: '#EDEDED'}} className="mt-2">Your code is clean ✓</div>
+                    <div style={{ color: '#6272A4' }}>No problems detected</div>
+                    <div style={{ color: '#EDEDED' }} className="mt-2">Your code is clean ✓</div>
                   </>
                 )}
               </div>
@@ -495,19 +598,31 @@ export default function IDE() {
         </div>
 
         {/* Right Sidebar - AI Assistant with Core Pulse */}
-        <div 
+        <div
           className="w-80 border-l bg-[#161616] relative"
           style={{ borderColor: '#FFB86C40' }}
         >
-          <CorePulse isThinking={false} />
-          
+          <AmbientIntelligence isTyping={aiTyping} isThinking={aiThinking} isPaused={aiPaused} />
+
           <div className="relative z-10 h-full flex flex-col">
             <div className="px-4 py-3 border-b border-[#FFB86C]/20 flex items-center gap-2">
               <Sparkles size={16} color="#FFB86C" />
               <span className="text-xs font-semibold text-[#FFB86C] uppercase tracking-wide">AI Assistant</span>
             </div>
-            
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+
+            <div
+              className="flex-1 overflow-y-auto p-4 space-y-4"
+              onScroll={() => {
+                setAiPaused(true);
+                clearTimeout(window.aiScrollTimeout);
+                window.aiScrollTimeout = setTimeout(() => setAiPaused(false), 500);
+              }}
+              onMouseDown={() => setAiPaused(true)}
+              onMouseUp={() => {
+                clearTimeout(window.aiInteractTimeout);
+                window.aiInteractTimeout = setTimeout(() => setAiPaused(false), 300);
+              }}
+            >
               <div className="flex justify-start">
                 <div
                   className="max-w-[80%] p-3 rounded-lg text-sm"
@@ -533,6 +648,9 @@ export default function IDE() {
                     color: '#EDEDED',
                     border: '1px solid #FFB86C40'
                   }}
+                  onFocus={() => setAiTyping(true)}
+                  onBlur={() => setAiTyping(false)}
+                  onChange={(e) => setAiTyping(e.target.value.length > 0)}
                 />
                 <Button
                   size="sm"
@@ -550,12 +668,7 @@ export default function IDE() {
         </div>
       </div>
 
-      <style>{`
-        @keyframes waveFlow {
-          0%, 100% { transform: translateY(-100%); }
-          50% { transform: translateY(calc(100vh + 100px)); }
-        }
-      `}</style>
+
     </div>
   );
 }
